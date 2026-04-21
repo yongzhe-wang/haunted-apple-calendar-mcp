@@ -117,7 +117,11 @@ async function main(): Promise<void> {
     {
       title: "Update event",
       description:
-        "Update fields of an existing event identified by event_id (its uid). Only provided fields are changed.",
+        "Update fields of an existing event identified by event_id (its uid). Only provided fields are changed. " +
+        "When calendar_name changes to a different calendar, the event is copied to the target and the source is deleted, " +
+        "so the returned id will be a NEW uid (cache it). Target calendar names are matched case-insensitively and with " +
+        "trimmed whitespace against list_calendars. Recurring events cannot be moved across calendars (returns an error) " +
+        "until v0.2 — edit the series in Calendar.app directly.",
       inputSchema: UpdateEventInput.shape,
     },
     async (args) => {

@@ -1,4 +1,5 @@
 import { describe, expect, it } from "vitest";
+import { AppleCalendarError } from "../src/errors.js";
 import { buildCreateEventScript, normalizeCreateEventDuration } from "../src/tools/create-event.js";
 import { buildDeleteEventScript } from "../src/tools/delete-event.js";
 import { buildListEventsScript, parseEventsOutput } from "../src/tools/list-events.js";
@@ -8,7 +9,9 @@ import {
   buildUpdateEventCopyScript,
   buildUpdateEventScript,
   buildVerifyEventScript,
+  mergeFields,
   normalizeUpdateEventDuration,
+  type SourceEvent,
 } from "../src/tools/update-event.js";
 import {
   CreateEventInput,
@@ -442,5 +445,141 @@ describe("matchesQuery", () => {
 
   it("returns false when no field matches", () => {
     expect(matchesQuery(base, "missing")).toBe(false);
+  });
+});
+
+describe("buildUpdateEventCopyScript — adversarial escape coverage", () => {
+  const baseMerged = {
+    title: "Moved meeting",
+    start_date: "2026-04-21T10:00:00Z",
+    end_date: "2026-04-21T11:00:00Z",
+    all_day: false,
+  };
+
+  it("escapes location payload", () => {
+    const payload = '"; do shell script "x';
+    const script = buildUpdateEventCopyScript("Appointments", {
+      ...baseMerged,
+      location: payload,
+    });
+    // The payload's closing quote must appear only in its escaped form.
+    expect(script).toContain('\\"');
+    expect(script).not.toContain(`location:"${payload}"`);
+    expect(script).toContain(`location:"\\"; do shell script \\"x"`);
+  });
+
+  it("escapes notes payload", () => {
+    const payload = '"; do shell script "y';
+    const script = buildUpdateEventCopyScript("Appointments", {
+      ...baseMerged,
+      notes: payload,
+    });
+    expect(script).toContain('\\"');
+    expect(script).not.toContain(`description:"${payload}"`);
+    expect(script).toContain(`description:"\\"; do shell script \\"y"`);
+  });
+
+  it("escapes url payload", () => {
+    const payload = '"; do shell script "z';
+    const script = buildUpdateEventCopyScript("Appointments", {
+      ...baseMerged,
+      url: payload,
+    });
+    expect(script).toContain('\\"');
+    expect(script).not.toContain(`url:"${payload}"`);
+    expect(script).toContain(`url:"\\"; do shell script \\"z"`);
+  });
+
+  it("escapes a backslash-quote combination in location", () => {
+    // Order matters: backslash must be doubled before the quote is escaped.
+    // Raw input: \" — the file shows `\"` which in the source string is: backslash + quote.
+    const payload = `\\"; evil`;
+    const script = buildUpdateEventCopyScript("Appointments", {
+      ...baseMerged,
+      location: payload,
+    });
+    // Both the backslash and the quote must be escaped in the emitted AppleScript.
+    expect(script).toContain(`\\\\\\"`);
+  });
+});
+
+describe("buildReadEventScript — recurrence wrapping", () => {
+  it("wraps recurrence access in try/on error", () => {
+    const script = buildReadEventScript("abc-123");
+    // The recurrence read must exist, and must live inside a try block so missing
+    // recurrence data doesn't abort the read — Calendar.app raises on access for
+    // non-recurring events.
+    expect(script).toContain("recurrence of ev");
+    // The block shape is `try\n    set evRecurrence to (recurrence of ev) as string\n  on error`
+    expect(script).toMatch(/try[\s\S]*recurrence of ev[\s\S]*on error/);
+  });
+});
+
+describe("mergeFields", () => {
+  // Build a fully-populated SourceEvent so we can test individual merge decisions
+  // without fighting typescript on optional fields.
+  function sourceOf(overrides: Partial<SourceEvent> = {}): SourceEvent {
+    return {
+      id: "src-uid-1",
+      title: "Original",
+      start: "2026-04-21T10:00:00.000Z",
+      end: "2026-04-21T11:00:00.000Z",
+      all_day: false,
+      calendar_name: "Work",
+      location: "Room A",
+      notes: "source notes",
+      url: "https://source.example",
+      recurrence: null,
+      ...overrides,
+    };
+  }
+
+  it("rejects inverted bounds on a non-all-day event", () => {
+    const source = sourceOf();
+    let caught: unknown = null;
+    try {
+      mergeFields(source, {
+        event_id: "src-uid-1",
+        start_date: "2026-04-21T12:00:00Z",
+        end_date: "2026-04-21T10:00:00Z",
+      });
+    } catch (err) {
+      caught = err;
+    }
+    expect(caught).toBeInstanceOf(AppleCalendarError);
+    // Internal carries the computed detail; user-facing carries the prescriptive phrase.
+    expect((caught as AppleCalendarError).message).toMatch(/not after start_date/i);
+    expect((caught as AppleCalendarError).userFacing).toMatch(/after start time/i);
+  });
+
+  it("rejects zero-length spans on a non-all-day event", () => {
+    const source = sourceOf();
+    expect(() =>
+      mergeFields(source, {
+        event_id: "src-uid-1",
+        start_date: "2026-04-21T12:00:00Z",
+        end_date: "2026-04-21T12:00:00Z",
+      }),
+    ).toThrow(AppleCalendarError);
+  });
+
+  it("preserves source location when args.location is undefined", () => {
+    const source = sourceOf({ location: "A" });
+    const merged = mergeFields(source, { event_id: "src-uid-1" });
+    expect(merged.location).toBe("A");
+  });
+
+  it("uses empty string when args.location is '' explicitly (write, not skip)", () => {
+    const source = sourceOf({ location: "A" });
+    const merged = mergeFields(source, { event_id: "src-uid-1", location: "" });
+    expect(merged.location).toBe("");
+  });
+
+  it("preserves undefined source.location as undefined when args.location is also undefined", () => {
+    // The UNSET path: source had no location, args didn't touch it → merged.location
+    // must stay undefined so the copy script skips the property entirely.
+    const source = sourceOf({ location: undefined });
+    const merged = mergeFields(source, { event_id: "src-uid-1" });
+    expect(merged.location).toBeUndefined();
   });
 });

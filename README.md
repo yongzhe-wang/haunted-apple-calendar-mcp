@@ -140,13 +140,13 @@ Why not a Swift/EventKit helper binary? EventKit is cleaner, but shipping a sign
 
 There are a handful of existing MCP servers that try to reach macOS Calendar.app. Most of them fall over in at least one of the same ways. This table is the landscape as of April 2026:
 
-| Repo | Approach | Status | Where it breaks |
-| --- | --- | --- | --- |
-| [supermemoryai/apple-mcp](https://github.com/supermemoryai/apple-mcp) | AppleScript (TS) | archived Aug 2025 | locale-dependent `date "${start.toLocaleString()}"`; incomplete string escape (quotes before backslashes); read path returns a hardcoded dummy event |
-| [Omar-V2/mcp-ical](https://github.com/Omar-V2/mcp-ical) | EventKit (Python) | active, 24 open issues | timezone bugs on list/create/delete (issues #17, #20, #25, #18); requires launching Claude from terminal for the permission prompt |
-| [joshrutkowski/applescript-mcp](https://github.com/joshrutkowski/applescript-mcp) | AppleScript (TS) | stale since Apr 2025 | zero escaping on event title — direct interpolation into AppleScript source |
-| [steipete/macos-automator-mcp](https://github.com/steipete/macos-automator-mcp) | Generic AppleScript runner (TS) | active | not calendar-specific; escaping responsibility pushed entirely to the LLM caller |
-| [PsychQuant/che-ical-mcp](https://github.com/PsychQuant/che-ical-mcp) | Native Swift EventKit | active | feature-rich but requires downloading a signed binary and a `PlistBuddy` + `codesign` ritual per IDE |
+| Repo                                                                              | Approach                        | Status                 | Where it breaks                                                                                                                                      |
+| --------------------------------------------------------------------------------- | ------------------------------- | ---------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------- |
+| [supermemoryai/apple-mcp](https://github.com/supermemoryai/apple-mcp)             | AppleScript (TS)                | archived Aug 2025      | locale-dependent `date "${start.toLocaleString()}"`; incomplete string escape (quotes before backslashes); read path returns a hardcoded dummy event |
+| [Omar-V2/mcp-ical](https://github.com/Omar-V2/mcp-ical)                           | EventKit (Python)               | active, 24 open issues | timezone bugs on list/create/delete (issues #17, #20, #25, #18); requires launching Claude from terminal for the permission prompt                   |
+| [joshrutkowski/applescript-mcp](https://github.com/joshrutkowski/applescript-mcp) | AppleScript (TS)                | stale since Apr 2025   | zero escaping on event title — direct interpolation into AppleScript source                                                                          |
+| [steipete/macos-automator-mcp](https://github.com/steipete/macos-automator-mcp)   | Generic AppleScript runner (TS) | active                 | not calendar-specific; escaping responsibility pushed entirely to the LLM caller                                                                     |
+| [PsychQuant/che-ical-mcp](https://github.com/PsychQuant/che-ical-mcp)             | Native Swift EventKit           | active                 | feature-rich but requires downloading a signed binary and a `PlistBuddy` + `codesign` ritual per IDE                                                 |
 
 ### Systemic problems across the category
 
@@ -172,7 +172,7 @@ There are a handful of existing MCP servers that try to reach macOS Calendar.app
 We're not feature-complete. Today this server does not cover:
 
 - Reminders.app (separate AppleScript target — tracked for v0.2).
-- Recurring-event expansion UI — RRULE strings are returned raw; client-side filtering only.
+- Recurring-event expansion UI — RRULE strings are returned raw; client-side filtering only. Cross-calendar moves of recurring events are explicitly blocked with a clear error (tracked for v0.2) rather than silently flattening the series.
 - Attendee management, conflict detection, batch operations — [che-ical-mcp](https://github.com/PsychQuant/che-ical-mcp) has these if you need them.
 - Sequoia TCC parent-process permission attribution is not documented in the install section yet.
 

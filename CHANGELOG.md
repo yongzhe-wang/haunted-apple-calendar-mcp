@@ -20,6 +20,28 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 - Competitive landscape section in README comparing apple-calendar-mcp to supermemoryai/apple-mcp, Omar-V2/mcp-ical, joshrutkowski/applescript-mcp, steipete/macos-automator-mcp, and PsychQuant/che-ical-mcp.
 
+## [0.1.2] - 2026-04-21
+
+### Fixed
+
+- `update_event`: same-uid delete race — when Calendar.app or iCloud sync assigned the copy the same uid as the source, the subsequent delete would wipe the copy too. Now aborts with a clear error before the destructive step. This is the exact mechanism that caused the 6-event data loss on 2026-04-21.
+- `update_event`: case- and whitespace-insensitive calendar-name resolution via `list_calendars`. "Entertainment " vs "Entertainment" no longer triggers a destructive copy-then-delete.
+- `update_event`: verify step now requires `count === 1` (previously only guarded `count < 1`). A duplicate copy no longer silently deletes the source.
+- `update_event`: rejects read-only target calendars before touching the source event.
+- `update_event`: all-day events no longer drift by local UTC offset during calendar moves — the TS `toISOString()` round-trip is skipped for `all_day: true`.
+- `update_event`: `mergeFields` distinguishes "unset" from empty string for optional fields via a sentinel, so the copy never stomps a user's existing location/notes/url with "".
+- `update_event`: rejects inverted bounds (`end_date <= start_date`) after field merging.
+
+### Added
+
+- `update_event`: explicit rejection with a clear error when asked to move a recurring event across calendars — previously this silently flattened the RRULE series to a single instance. Full recurring-event move support tracked for v0.2.
+- Orchestrator-level tests covering verify-fail, create-fail, delete-fail, same-uid, recurring, read-only-target, and nonexistent-target branches.
+- Adversarial escape tests for `location`, `notes`, and `url` in the copy script builder.
+
+### Changed
+
+- `update_event`: when `calendar_name` changes, the returned `id` is now a new uid (the copy's uid). Callers caching ids must refresh after a cross-calendar move.
+
 ## [0.1.0] — 2026-04-21
 
 Initial public release.

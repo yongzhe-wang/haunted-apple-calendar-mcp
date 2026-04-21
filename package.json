@@ -63,7 +63,7 @@
     "@types/node": "^22.10.0",
     "@vitest/coverage-v8": "^4.1.5",
     "knip": "^5.33.0",
-    "markdownlint-cli2": "^0.18.0",
+    "markdownlint-cli2": "^0.22.0",
     "oxfmt": "^0.45.0",
     "oxlint": "^1.60.0",
     "tsdown": "^0.21.9",

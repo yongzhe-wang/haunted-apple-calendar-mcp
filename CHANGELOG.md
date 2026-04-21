@@ -8,13 +8,17 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 ### Fixed
 
+- `update_event`: when changing `calendar_name`, use copy-then-delete semantics to avoid the destructive `move` bug where combined rename+move operations silently destroyed the event. Event `id` changes on calendar move (new uid is returned in the response).
 - `list_events` now expands weekly recurring Calendar.app series in TypeScript so Apple/iOS Calendar day views include visible course events instead of only non-recurring or partially matched source-account events.
 - `list_events` now keeps one-off event queries on the requested window and reserves the wider historical scan for recurring series only, which fixes short-range MCP calls that could hang on large writable calendars.
 - `create_event` now normalizes short meeting requests to a minimum one-hour duration by default.
 - `update_event` now normalizes short meeting updates to a minimum one-hour duration when both start and end are provided.
-- `update_event` now rebinds the event after moving it between calendars, fixing save failures caused by stale AppleScript object references.
 - AppleScript date writes now use explicit local date components instead of epoch seconds, fixing timezone drift where local evening meetings could be created several hours late in Calendar.app.
 - `create_event` and `update_event` now serialize returned timestamps using the same local-date path as `list_events`, so MCP responses match the wall-clock times actually written to Calendar.app.
+
+### Added
+
+- Competitive landscape section in README comparing apple-calendar-mcp to supermemoryai/apple-mcp, Omar-V2/mcp-ical, joshrutkowski/applescript-mcp, steipete/macos-automator-mcp, and PsychQuant/che-ical-mcp.
 
 ## [0.1.0] — 2026-04-21
 

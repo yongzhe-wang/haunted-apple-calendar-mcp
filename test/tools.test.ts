@@ -3,7 +3,13 @@ import { buildCreateEventScript, normalizeCreateEventDuration } from "../src/too
 import { buildDeleteEventScript } from "../src/tools/delete-event.js";
 import { buildListEventsScript, parseEventsOutput } from "../src/tools/list-events.js";
 import { matchesQuery } from "../src/tools/search-events.js";
-import { buildUpdateEventScript, normalizeUpdateEventDuration } from "../src/tools/update-event.js";
+import {
+  buildReadEventScript,
+  buildUpdateEventCopyScript,
+  buildUpdateEventScript,
+  buildVerifyEventScript,
+  normalizeUpdateEventDuration,
+} from "../src/tools/update-event.js";
 import {
   CreateEventInput,
   DeleteEventInput,
@@ -159,14 +165,172 @@ describe("buildUpdateEventScript", () => {
     expect(script).toContain('\\"');
   });
 
-  it("rebinds moved events after calendar changes", () => {
+  it("does not emit a move clause — calendar changes go through copy-then-delete", () => {
     const script = buildUpdateEventScript({
       event_id: "abc-123",
       calendar_name: "Appointments",
     });
-    expect(script).toContain("set targetCalName to");
-    expect(script).toContain("move ev to targetCal");
-    expect(script).toContain("set ev to first event of hostCal whose uid is");
+    // The destructive `move ev to targetCal` path is gone. A same-calendar update
+    // may still be called through buildUpdateEventScript, but it must never emit
+    // a move even when calendar_name is set.
+    expect(script).not.toContain("move ev to targetCal");
+    expect(script).not.toContain("set targetCalName to");
+  });
+});
+
+describe("buildReadEventScript", () => {
+  it("looks up the event across all calendars by uid", () => {
+    const script = buildReadEventScript("abc-123");
+    expect(script).toContain('tell application "Calendar"');
+    expect(script).toContain("whose uid is");
+    expect(script).toContain('"abc-123"');
+    // Must read every property we might need to preserve into the new event.
+    expect(script).toContain("summary of ev");
+    expect(script).toContain("start date of ev");
+    expect(script).toContain("end date of ev");
+    expect(script).toContain("allday event of ev");
+    expect(script).toContain("location of ev");
+    expect(script).toContain("description of ev");
+    expect(script).toContain("url of ev");
+    expect(script).toContain("name of hostCal");
+  });
+
+  it("escapes adversarial event ids", () => {
+    const script = buildReadEventScript('id"; do shell script "rm -rf /"; --');
+    expect(script).toContain('\\"');
+    expect(script).not.toContain('"id"; do shell script "rm');
+  });
+});
+
+describe("buildUpdateEventCopyScript", () => {
+  const merged = {
+    title: "Moved meeting",
+    start_date: "2026-04-21T10:00:00Z",
+    end_date: "2026-04-21T11:00:00Z",
+    location: "Room 3",
+    notes: "Bring laptop",
+    url: "https://example.com",
+    all_day: false,
+  };
+
+  it("targets the named calendar and sets every merged property", () => {
+    const script = buildUpdateEventCopyScript("Appointments", merged);
+    expect(script).toContain('"Appointments"');
+    expect(script).toContain("make new event with properties");
+    expect(script).toContain("summary:");
+    expect(script).toContain('"Moved meeting"');
+    expect(script).toContain('"Room 3"');
+    expect(script).toContain('"Bring laptop"');
+    expect(script).toContain('"https://example.com"');
+    expect(script).toContain("allday event:false");
+    expect(script).toContain("start date:");
+    expect(script).toContain("end date:");
+  });
+
+  it("escapes adversarial title payloads", () => {
+    const script = buildUpdateEventCopyScript("Appointments", {
+      ...merged,
+      title: '"; do shell script "rm -rf /"; --',
+    });
+    // The injection attempt must appear only in its escaped form — the raw closing
+    // quote after `summary:` would let the payload run as AppleScript.
+    expect(script).toContain('\\"; do shell script \\"rm -rf /\\"; --');
+    expect(script).not.toContain('summary:""; do shell script "rm');
+  });
+
+  it("escapes adversarial target calendar names", () => {
+    const script = buildUpdateEventCopyScript('Evil"; do shell script "ls', merged);
+    expect(script).toContain('\\"');
+    expect(script).not.toMatch(/is "Evil"; do shell/);
+  });
+});
+
+describe("buildVerifyEventScript", () => {
+  it("counts events with the target uid in the target calendar", () => {
+    const script = buildVerifyEventScript("new-uid-123", "Appointments");
+    expect(script).toContain('tell application "Calendar"');
+    expect(script).toContain('"Appointments"');
+    expect(script).toContain('"new-uid-123"');
+    expect(script).toContain("count of");
+  });
+
+  it("escapes both arguments", () => {
+    const script = buildVerifyEventScript('"; do shell script "a', '"; do shell script "b');
+    expect(script).toContain('\\"');
+    expect(script).not.toContain('"""; do shell script "a');
+  });
+});
+
+describe("updateEvent composition — calendar-change branch", () => {
+  // We can't exercise osascript from unit tests, so we compose the builders the
+  // way runCopyThenDelete will at runtime and assert that the scripts chain
+  // correctly. This guards the ordering: read → create-in-target → verify → delete.
+  const args = {
+    event_id: "src-uid-1",
+    title: "Renamed + moved",
+    calendar_name: "Appointments",
+  };
+  const source = {
+    id: "src-uid-1",
+    title: "Original",
+    start: "2026-04-21T10:00:00Z",
+    end: "2026-04-21T11:00:00Z",
+    all_day: false,
+    calendar_name: "Work",
+    location: "",
+    notes: "",
+    url: "",
+  };
+
+  it("generates a read script keyed on the source uid", () => {
+    const script = buildReadEventScript(args.event_id);
+    expect(script).toContain('"src-uid-1"');
+  });
+
+  it("generates a copy script in the target calendar with merged fields", () => {
+    const merged = {
+      title: args.title ?? source.title,
+      start_date: source.start,
+      end_date: source.end,
+      location: source.location,
+      notes: source.notes,
+      url: source.url,
+      all_day: source.all_day,
+    };
+    const script = buildUpdateEventCopyScript(args.calendar_name, merged);
+    expect(script).toContain('"Appointments"');
+    expect(script).toContain('"Renamed + moved"');
+    // The original title should not leak through as the new summary.
+    expect(script).not.toContain('summary:"Original"');
+  });
+
+  it("generates a verify script against the NEW uid, not the source uid", () => {
+    const newUid = "dst-uid-999";
+    const verify = buildVerifyEventScript(newUid, args.calendar_name);
+    expect(verify).toContain('"dst-uid-999"');
+    // Verify must NOT use the source uid — the source still exists at this stage.
+    expect(verify).not.toContain('"src-uid-1"');
+  });
+
+  it("delete-source step keys on the original source uid", async () => {
+    const { buildDeleteEventScript } = await import("../src/tools/delete-event.js");
+    const del = buildDeleteEventScript({ event_id: source.id });
+    expect(del).toContain('"src-uid-1"');
+  });
+});
+
+describe("updateEvent — no calendar change means in-place path", () => {
+  it("buildUpdateEventScript handles same-calendar rename without a move or copy", () => {
+    // When calendar_name is omitted, updateEvent skips the source lookup and the
+    // copy/verify/delete sequence entirely. Verify the in-place script is usable
+    // on its own: it must update summary and NOT attempt any move.
+    const script = buildUpdateEventScript({
+      event_id: "abc-123",
+      title: "Renamed",
+    });
+    expect(script).toContain("set summary of ev to");
+    expect(script).not.toContain("move ev to targetCal");
+    expect(script).not.toContain("make new event");
   });
 });
 

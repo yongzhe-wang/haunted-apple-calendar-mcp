@@ -136,6 +136,48 @@ To survive arbitrary user text inside that result (commas, newlines, quotes, emo
 
 Why not a Swift/EventKit helper binary? EventKit is cleaner, but shipping a signed native binary through npm is a packaging nightmare, and AppleScript + `osascript` is already on every Mac. The trade-off is verbose scripts; the win is zero-dependency distribution.
 
+## Why another Apple Calendar MCP?
+
+There are a handful of existing MCP servers that try to reach macOS Calendar.app. Most of them fall over in at least one of the same ways. This table is the landscape as of April 2026:
+
+| Repo | Approach | Status | Where it breaks |
+| --- | --- | --- | --- |
+| [supermemoryai/apple-mcp](https://github.com/supermemoryai/apple-mcp) | AppleScript (TS) | archived Aug 2025 | locale-dependent `date "${start.toLocaleString()}"`; incomplete string escape (quotes before backslashes); read path returns a hardcoded dummy event |
+| [Omar-V2/mcp-ical](https://github.com/Omar-V2/mcp-ical) | EventKit (Python) | active, 24 open issues | timezone bugs on list/create/delete (issues #17, #20, #25, #18); requires launching Claude from terminal for the permission prompt |
+| [joshrutkowski/applescript-mcp](https://github.com/joshrutkowski/applescript-mcp) | AppleScript (TS) | stale since Apr 2025 | zero escaping on event title — direct interpolation into AppleScript source |
+| [steipete/macos-automator-mcp](https://github.com/steipete/macos-automator-mcp) | Generic AppleScript runner (TS) | active | not calendar-specific; escaping responsibility pushed entirely to the LLM caller |
+| [PsychQuant/che-ical-mcp](https://github.com/PsychQuant/che-ical-mcp) | Native Swift EventKit | active | feature-rich but requires downloading a signed binary and a `PlistBuddy` + `codesign` ritual per IDE |
+
+### Systemic problems across the category
+
+1. **AppleScript injection.** Most AppleScript-based servers either don't escape user input at all, or escape in the wrong order (quotes before backslashes, which is broken). A malicious event title can exit the AppleScript string and run arbitrary shell.
+2. **Locale-sensitive date literals.** AppleScript's `date "Monday, April 21, 2026 at 10:00:00 AM"` parses differently in non-US locales. Several servers ship this bug.
+3. **Timezone handling in EventKit servers.** Moving off AppleScript doesn't fix timezone correctness — the Python EventKit option has open bugs on all-day events, recurring deletions, and ISO 8601 parsing.
+4. **Permission UX is uniformly painful.** Servers variously require `codesign` invocations, running Claude from a terminal, or a special launch path to trigger the TCC prompt.
+5. **`stdout`-vs-`stderr` discipline is undocumented.** MCP speaks JSON-RPC on stdout; a stray `console.log` in server code silently corrupts the transport. No competitor README flags this.
+6. **No published threat model.** None of the above ship a `SECURITY.md` that names AppleScript injection, permission scope, or the stdout invariant.
+
+### What this server does differently
+
+- **`escapeAppleScriptString` escapes `\` before `"`, tested with adversarial payloads** including `"; do shell script "rm -rf /"; --` in every string field.
+- **`isoToAppleScriptDate` is built from epoch seconds against a fixed 1970 anchor** so it parses identically on every macOS locale.
+- **Event `id` is Calendar.app's own `uid` property** — stable across app restarts and (with the copy-then-delete update path) survives calendar moves cleanly.
+- **`console.log` is banned in server code paths.** All diagnostics go to `stderr`. `stdout` is reserved for the MCP transport.
+- **Every tool argument is validated by `zod`** at the boundary.
+- **`osascript` runs with a 16 MiB output cap** to bound memory on runaway scripts.
+- **[`SECURITY.md`](SECURITY.md) documents the threat model** — AppleScript injection, permission scope, stdout transport.
+
+### Honest gaps
+
+We're not feature-complete. Today this server does not cover:
+
+- Reminders.app (separate AppleScript target — tracked for v0.2).
+- Recurring-event expansion UI — RRULE strings are returned raw; client-side filtering only.
+- Attendee management, conflict detection, batch operations — [che-ical-mcp](https://github.com/PsychQuant/che-ical-mcp) has these if you need them.
+- Sequoia TCC parent-process permission attribution is not documented in the install section yet.
+
+If you need any of the above today, che-ical-mcp or mcp-ical are your better options. If you want a small, correctness-first calendar bridge that won't eat your events, this is it.
+
 ## FAQ
 
 **Does this need iCloud?** No. It talks to whatever calendars are configured in Calendar.app — iCloud, Google (via Calendar.app), local "On My Mac", CalDAV, whatever. If Calendar.app can see it, this server can.

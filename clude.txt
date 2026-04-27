@@ -2,7 +2,7 @@
 
 These rules apply whenever Claude (or any AI assistant) manages calendar events in this user's Apple Calendar / iOS Calendar via apple-calendar-mcp.
 
-Last updated: 2026-04-21
+Last updated: 2026-04-27
 
 ## Tool usage
 
@@ -45,3 +45,4 @@ Last updated: 2026-04-21
 - If an update_event call fails with -10025 "Object not found. It may have been deleted." after a move-between-calendars operation, search Calendar.app by title fragment to locate the event — the event may have landed in the target calendar with a new UID.
 - Before bulk-creating events, list_calendars first to confirm the target calendar name exists (case-sensitive, spaces matter — e.g., "Entertainment " has a trailing space).
 - After creating or moving events, verify via list_events on the exact time window to confirm the event is visible.
+- After refetching wall-clock date+time via osascript, you MUST explicitly echo the result in your user-visible response BEFORE making any time-relative decision (e.g., "Today is Mon Apr 27, so 'tomorrow' = Tue Apr 28."). Never reason silently from the osascript output. The echo-then-decide step exists because the assistant has been observed to fetch the correct date but then fall back to a stale session-internal date when computing "tomorrow"/"this weekend"/"tonight". An explicit echo forces the comparison.

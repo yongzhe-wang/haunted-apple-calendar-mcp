@@ -154,3 +154,7 @@ Do not land a PR with a failing gate. Do not disable rules to silence a legitima
 - The MCP SDK version (`@modelcontextprotocol/sdk`) moves fast. When bumping, re-run the server against Claude Code manually — tool registration shape changes between majors.
 - `osascript` has a hard output buffer limit. `OSASCRIPT_MAX_BUFFER = 16 MiB` in `applescript.ts` is intentional; don't raise it without thinking through DoS.
 - Calendar.app is slow. `OSASCRIPT_TIMEOUT_MS = 30_000` covers most real calendars; some users have hundreds of calendars and may need more.
+
+## Persona conventions
+
+When adding a new built-in persona to `src/personas.ts`, include an explicit `**Variation:**` clause in the directive that lists 4–6 alternative openers and tells Claude to rotate them. Personas that lock to a single opener compress the joke to a single hit; voice should be constant, cadence should rotate. See the comment block at the top of `src/personas.ts` for the principle. The test in `test/list-events-in-persona.test.ts` enforces that every built-in directive contains the literal substring `Variation:`.

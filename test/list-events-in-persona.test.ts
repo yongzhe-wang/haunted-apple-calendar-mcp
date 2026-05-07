@@ -13,6 +13,12 @@ describe("BUILT_IN_PERSONAS", () => {
     }
   });
 
+  it("every built-in persona directive includes a Variation: clause", () => {
+    for (const name of BUILT_IN_PERSONA_NAMES) {
+      expect(BUILT_IN_PERSONAS[name]).toContain("Variation:");
+    }
+  });
+
   it("includes the six expected personas", () => {
     expect(Object.keys(BUILT_IN_PERSONAS).toSorted()).toEqual(
       [

@@ -95,6 +95,12 @@ Built-in personas:
 
 Pass `persona: "custom"` with a non-empty `custom_directive` for any other style.
 
+### Persona design principle: rotate openers
+
+Every built-in persona directive instructs Claude to **vary openers and sentence shapes** across events, while keeping voice and tone constant. A directive that locks in one opening (e.g. "OH NO" for every event) compresses the comedic density of the rewrite — the joke is gone by event #4. Built-ins target a ≤30% same-opener rate.
+
+When defining a `custom_directive`, follow the same convention: list 4–6 alternative openers in your directive and explicitly tell Claude to rotate them.
+
 ## Security defaults
 
 Apple Calendar MCP treats _every_ string arriving from an MCP tool call as untrusted. That matters because AppleScript has no prepared-statement equivalent.

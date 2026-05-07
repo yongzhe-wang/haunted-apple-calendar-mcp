@@ -4,14 +4,20 @@ import { formatUserFacingError } from "./errors.js";
 import { createEvent } from "./tools/create-event.js";
 import { deleteEvent } from "./tools/delete-event.js";
 import { listCalendars } from "./tools/list-calendars.js";
+import { listEventsInPersona } from "./tools/list-events-in-persona.js";
 import { listEvents } from "./tools/list-events.js";
 import { searchEvents } from "./tools/search-events.js";
+import { timePerCalendar } from "./tools/time-per-calendar.js";
 import { updateEvent } from "./tools/update-event.js";
 import {
   CreateEventInput,
   DeleteEventInput,
+  ListEventsInPersonaInput,
+  ListEventsInPersonaInputObject,
   ListEventsInput,
   SearchEventsInput,
+  TimePerCalendarInput,
+  TimePerCalendarInputObject,
   UpdateEventInput,
 } from "./types.js";
 
@@ -128,6 +134,47 @@ async function main(): Promise<void> {
       try {
         const parsed = UpdateEventInput.parse(args);
         return ok(await updateEvent(parsed));
+      } catch (err) {
+        return fail(err);
+      }
+    },
+  );
+
+  server.registerTool(
+    "time_per_calendar",
+    {
+      title: "Time per calendar",
+      description:
+        "Aggregate event durations per calendar within a time window. Returns timed seconds, event counts, " +
+        "all-day counts, and percentage of the window each calendar consumed. Common read-only calendars " +
+        "(US/CN holidays, birthdays, Siri Suggestions, Scheduled Reminders) are excluded by default.",
+      inputSchema: TimePerCalendarInputObject.shape,
+    },
+    async (args) => {
+      try {
+        const parsed = TimePerCalendarInput.parse(args);
+        return ok(await timePerCalendar(parsed));
+      } catch (err) {
+        return fail(err);
+      }
+    },
+  );
+
+  server.registerTool(
+    "list_events_in_persona",
+    {
+      title: "List events in persona",
+      description:
+        "List events between start_date and end_date and return them alongside a persona directive that " +
+        "tells the calling LLM how to rewrite each event. Built-in personas: werner_herzog, hemingway, " +
+        "four_year_old, asian_mom, marcus_aurelius, anxious_golden_retriever. Use persona='custom' with " +
+        "custom_directive for a freeform style.",
+      inputSchema: ListEventsInPersonaInputObject.shape,
+    },
+    async (args) => {
+      try {
+        const parsed = ListEventsInPersonaInput.parse(args);
+        return ok(await listEventsInPersona(parsed));
       } catch (err) {
         return fail(err);
       }

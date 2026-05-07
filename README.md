@@ -65,16 +65,35 @@ You may also need **Privacy & Security → Calendars** enabled for the same app.
 
 ## Tools
 
-| Tool             | Description                                   | Key args                                                                                       |
-| ---------------- | --------------------------------------------- | ---------------------------------------------------------------------------------------------- |
-| `list_calendars` | All calendars with `name` + `writable`        | —                                                                                              |
-| `list_events`    | Events in a date range                        | `start_date`, `end_date`, `calendar_name?`, `limit?`                                           |
-| `search_events`  | Substring match across title, location, notes | `query`, `start_date?`, `end_date?`, `limit?`                                                  |
-| `create_event`   | Create a new event on any writable calendar   | `title`, `start_date`, `end_date`, `calendar_name?`, `location?`, `notes?`, `url?`, `all_day?` |
-| `update_event`   | Update any subset of fields                   | `event_id`, plus any optional field from `create_event`                                        |
-| `delete_event`   | Delete by id                                  | `event_id`                                                                                     |
+| Tool                     | Description                                                                                                                           | Key args                                                                                       |
+| ------------------------ | ------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------- |
+| `list_calendars`         | All calendars with `name` + `writable`                                                                                                | —                                                                                              |
+| `list_events`            | Events in a date range                                                                                                                | `start_date`, `end_date`, `calendar_name?`, `limit?`                                           |
+| `search_events`          | Substring match across title, location, notes                                                                                         | `query`, `start_date?`, `end_date?`, `limit?`                                                  |
+| `create_event`           | Create a new event on any writable calendar                                                                                           | `title`, `start_date`, `end_date`, `calendar_name?`, `location?`, `notes?`, `url?`, `all_day?` |
+| `update_event`           | Update any subset of fields                                                                                                           | `event_id`, plus any optional field from `create_event`                                        |
+| `delete_event`           | Delete by id                                                                                                                          | `event_id`                                                                                     |
+| `time_per_calendar`      | Aggregate event durations per calendar over a window. `exclude_calendars` matches names **exactly** — case- and whitespace-sensitive. | `start_date`, `end_date`, `exclude_calendars?`, `skip_allday?`                                 |
+| `list_events_in_persona` | List events plus a persona directive for the LLM to apply                                                                             | `persona`, `start_date`, `end_date`, `calendars?`, `custom_directive?`                         |
 
 All dates are ISO 8601 (`2026-04-21T14:30:00Z` or `2026-04-21T10:30:00-07:00`). Event `id` values are Calendar.app `uid` strings — stable across calls, safe to stash and reuse.
+
+## Personas
+
+`list_events_in_persona` returns the raw events alongside a `persona_directive` string the calling LLM is expected to apply. The MCP server itself never rewrites text — the rewrite happens client-side in Claude.
+
+Built-in personas:
+
+| Persona                    | Voice                                                              |
+| -------------------------- | ------------------------------------------------------------------ |
+| `werner_herzog`            | Cosmic dread, philosophical detachment, the indifference of voids. |
+| `hemingway`                | Short declarative sentences. Concrete nouns. No adverbs.           |
+| `four_year_old`            | Stream of consciousness, tangents, garbled vocabulary.             |
+| `asian_mom`                | Worried 中文+English mix. Food, sleep, marriage, calling grandma.  |
+| `marcus_aurelius`          | Stoic second-person notes to oneself, Meditations style.           |
+| `anxious_golden_retriever` | Inner monologue of a very good boy who is also very worried.       |
+
+Pass `persona: "custom"` with a non-empty `custom_directive` for any other style.
 
 ## Security defaults
 

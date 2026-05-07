@@ -4,6 +4,7 @@ import type {
   ListEventsInPersonaArgs,
   ListEventsInPersonaResult,
 } from "../types.js";
+import { mapWithConcurrency } from "../util/concurrency.js";
 import { listEvents } from "./list-events.js";
 
 export const REWRITE_INSTRUCTIONS =
@@ -46,35 +47,6 @@ export async function listEventsInPersona(
 ): Promise<ListEventsInPersonaResult> {
   const events = await collectEvents(args);
   return buildPersonaResult(args, events);
-}
-
-// Tiny bounded-concurrency map. Inline so we don't pull in p-limit; the
-// scheduler is just N workers each draining a shared cursor.
-async function mapWithConcurrency<T, R>(
-  items: T[],
-  limit: number,
-  fn: (item: T) => Promise<R>,
-): Promise<R[]> {
-  const results: R[] = Array.from({ length: items.length });
-  let i = 0;
-  const workerCount = Math.min(limit, items.length);
-  const workers = Array.from({ length: workerCount }, async () => {
-    while (true) {
-      const idx = i++;
-      if (idx >= items.length) {
-        return;
-      }
-      const item = items[idx];
-      // noUncheckedIndexedAccess: idx is < items.length, so item is defined.
-      // The `if` keeps the type checker happy without a non-null assertion.
-      if (item === undefined) {
-        continue;
-      }
-      results[idx] = await fn(item);
-    }
-  });
-  await Promise.all(workers);
-  return results;
 }
 
 async function collectEvents(args: ListEventsInPersonaArgs): Promise<CalendarEvent[]> {

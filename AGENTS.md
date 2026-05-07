@@ -6,7 +6,7 @@ Telegraph style. Root rules only. This file is for AI coding agents opening this
 
 - **Name:** `apple-calendar-mcp`
 - **Purpose:** MCP server exposing macOS Calendar.app to Claude (and any other MCP client) via AppleScript.
-- **Scope:** single-package, single-binary CLI. Nine tools. Stdio transport only.
+- **Scope:** single-package, single-binary CLI. Ten tools. Stdio transport only.
 - **Platform:** macOS only (`package.json` declares `"os": ["darwin"]`).
 - **Runtime:** Node 22.14+.
 - **Package manager:** pnpm 10.33.0 (see `packageManager` field).
@@ -20,6 +20,8 @@ src/
   applescript.ts        # osascript exec wrapper + escapeAppleScriptString + isoToAppleScriptDate + parseRecords
   errors.ts             # AppleCalendarError + isPermissionError + formatUserFacingError
   types.ts              # zod schemas for all tool inputs/outputs
+  personas.ts           # built-in persona directives for list_events_in_persona
+  voices.ts             # built-in 30+ voice pool for list_events_in_mixed_personas
   tools/
     list-calendars.ts
     list-events.ts      # buildListEventsScript + parseEventsOutput + listEvents
@@ -29,6 +31,7 @@ src/
     delete-event.ts     # buildDeleteEventScript + deleteEvent
     time-per-calendar.ts        # aggregate event durations per calendar
     list-events-in-persona.ts   # events + persona directive for LLM rewrite
+    list-events-in-mixed-personas.ts # distinct-voice-per-event from 30+ pool (thematic/shuffled/sequential)
     mortality-overlay.ts        # events annotated with life_percent_consumed (memento mori)
   util/
     concurrency.ts      # mapWithConcurrency, shared bounded fan-out helper
@@ -163,3 +166,5 @@ Do not land a PR with a failing gate. Do not disable rules to silence a legitima
 ## Persona conventions
 
 When adding a new built-in persona to `src/personas.ts`, include an explicit `**Variation:**` clause in the directive that lists 4–6 alternative openers and tells Claude to rotate them. Personas that lock to a single opener compress the joke to a single hit; voice should be constant, cadence should rotate. See the comment block at the top of `src/personas.ts` for the principle. The test in `test/list-events-in-persona.test.ts` enforces that every built-in directive contains the literal substring `Variation:`.
+
+The same principle applies to voices in `src/voices.ts` (used by `list_events_in_mixed_personas`). Each voice's `directive` is shorter (≤300 chars), but must still mention "Vary"/"vary"/"rotate"/"≤30%" or similar variation guidance — `test/list-events-in-mixed-personas.test.ts` enforces this. Voice/tone is the constant; cadence rotates.

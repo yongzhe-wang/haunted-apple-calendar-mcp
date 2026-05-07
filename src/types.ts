@@ -196,6 +196,48 @@ export const MortalityOverlayOutput = z.object({
   }),
 });
 
+// list_events_in_mixed_personas: assigns a DISTINCT voice from a 30+ pool to
+// each event in the window. The voice/tone is the constant; cadence rotates.
+export const MixedPersonasAssignmentStrategy = z.enum(["sequential", "shuffled", "thematic"]);
+
+export const ListEventsInMixedPersonasInputObject = z.object({
+  start_date: isoDate,
+  end_date: isoDate,
+  calendars: z.array(z.string().max(256)).max(20).optional(),
+  voice_pool: z.array(z.string().max(128)).max(200).optional(),
+  assignment_strategy: MixedPersonasAssignmentStrategy.default("thematic"),
+  seed: z.number().int().default(42),
+  include_mortality: z.boolean().default(false),
+});
+
+export const ListEventsInMixedPersonasInput = ListEventsInMixedPersonasInputObject.refine(
+  (v) => Date.parse(v.end_date) > Date.parse(v.start_date),
+  {
+    message: "end_date must be strictly after start_date",
+    path: ["end_date"],
+  },
+);
+
+export const MixedPersonaEventSchema = EventSchema.extend({
+  voice_name: z.string(),
+  voice_directive: z.string(),
+  life_percent_consumed: z.number().optional(),
+});
+
+export const ListEventsInMixedPersonasOutput = z.object({
+  events: z.array(MixedPersonaEventSchema),
+  voices_used: z.array(z.string()),
+  voice_pool_size: z.number().int(),
+  pool_exhausted_warning: z.boolean(),
+  assignment_strategy: z.string(),
+  rewrite_instructions: z.string(),
+});
+
+export type MixedPersonasAssignmentStrategyType = z.infer<typeof MixedPersonasAssignmentStrategy>;
+export type ListEventsInMixedPersonasArgs = z.infer<typeof ListEventsInMixedPersonasInput>;
+export type MixedPersonaEvent = z.infer<typeof MixedPersonaEventSchema>;
+export type ListEventsInMixedPersonasResult = z.infer<typeof ListEventsInMixedPersonasOutput>;
+
 export type ListEventsArgs = z.infer<typeof ListEventsInput>;
 export type SearchEventsArgs = z.infer<typeof SearchEventsInput>;
 export type CreateEventArgs = z.infer<typeof CreateEventInput>;

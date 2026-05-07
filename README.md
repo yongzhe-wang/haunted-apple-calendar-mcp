@@ -65,17 +65,18 @@ You may also need **Privacy & Security → Calendars** enabled for the same app.
 
 ## Tools
 
-| Tool                     | Description                                                                                                                                               | Key args                                                                                                   |
-| ------------------------ | --------------------------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------- |
-| `list_calendars`         | All calendars with `name` + `writable`                                                                                                                    | —                                                                                                          |
-| `list_events`            | Events in a date range                                                                                                                                    | `start_date`, `end_date`, `calendar_name?`, `limit?`                                                       |
-| `search_events`          | Substring match across title, location, notes                                                                                                             | `query`, `start_date?`, `end_date?`, `limit?`                                                              |
-| `create_event`           | Create a new event on any writable calendar                                                                                                               | `title`, `start_date`, `end_date`, `calendar_name?`, `location?`, `notes?`, `url?`, `all_day?`             |
-| `update_event`           | Update any subset of fields                                                                                                                               | `event_id`, plus any optional field from `create_event`                                                    |
-| `delete_event`           | Delete by id                                                                                                                                              | `event_id`                                                                                                 |
-| `time_per_calendar`      | Aggregate event durations per calendar over a window. `exclude_calendars` matches names **exactly** — case- and whitespace-sensitive.                     | `start_date`, `end_date`, `exclude_calendars?`, `skip_allday?`                                             |
-| `list_events_in_persona` | List events plus a persona directive for the LLM to apply                                                                                                 | `persona`, `start_date`, `end_date`, `calendars?`, `custom_directive?`                                     |
-| `mortality_overlay`      | List events with each one annotated as a fraction of an expected lifetime (cumulative running total + optional birth-date-anchored "% of remaining life") | `start_date`, `end_date`, `expected_lifespan_years?`, `waking_hours_per_day?`, `calendars?`, `birth_date?` |
+| Tool                            | Description                                                                                                                                                | Key args                                                                                                     |
+| ------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------ |
+| `list_calendars`                | All calendars with `name` + `writable`                                                                                                                     | —                                                                                                            |
+| `list_events`                   | Events in a date range                                                                                                                                     | `start_date`, `end_date`, `calendar_name?`, `limit?`                                                         |
+| `search_events`                 | Substring match across title, location, notes                                                                                                              | `query`, `start_date?`, `end_date?`, `limit?`                                                                |
+| `create_event`                  | Create a new event on any writable calendar                                                                                                                | `title`, `start_date`, `end_date`, `calendar_name?`, `location?`, `notes?`, `url?`, `all_day?`               |
+| `update_event`                  | Update any subset of fields                                                                                                                                | `event_id`, plus any optional field from `create_event`                                                      |
+| `delete_event`                  | Delete by id                                                                                                                                               | `event_id`                                                                                                   |
+| `time_per_calendar`             | Aggregate event durations per calendar over a window. `exclude_calendars` matches names **exactly** — case- and whitespace-sensitive.                      | `start_date`, `end_date`, `exclude_calendars?`, `skip_allday?`                                               |
+| `list_events_in_persona`        | List events plus a persona directive for the LLM to apply                                                                                                  | `persona`, `start_date`, `end_date`, `calendars?`, `custom_directive?`                                       |
+| `list_events_in_mixed_personas` | List events with a DISTINCT voice per event, drawn from a 30+ pool. Optional thematic mapping (DMV→Kafka, exam→Plath, etc.) and "for free" mortality hint. | `start_date`, `end_date`, `calendars?`, `voice_pool?`, `assignment_strategy?`, `seed?`, `include_mortality?` |
+| `mortality_overlay`             | List events with each one annotated as a fraction of an expected lifetime (cumulative running total + optional birth-date-anchored "% of remaining life")  | `start_date`, `end_date`, `expected_lifespan_years?`, `waking_hours_per_day?`, `calendars?`, `birth_date?`   |
 
 All dates are ISO 8601 (`2026-04-21T14:30:00Z` or `2026-04-21T10:30:00-07:00`). Event `id` values are Calendar.app `uid` strings — stable across calls, safe to stash and reuse.
 
@@ -101,6 +102,20 @@ Pass `persona: "custom"` with a non-empty `custom_directive` for any other style
 Every built-in persona directive instructs Claude to **vary openers and sentence shapes** across events, while keeping voice and tone constant. A directive that locks in one opening (e.g. "OH NO" for every event) compresses the comedic density of the rewrite — the joke is gone by event #4. Built-ins target a ≤30% same-opener rate.
 
 When defining a `custom_directive`, follow the same convention: list 4–6 alternative openers in your directive and explicitly tell Claude to rotate them.
+
+## Mixed Personas
+
+`list_events_in_mixed_personas` extends the persona idea: instead of one voice for all events, every event gets a **different** voice drawn from a 30+ built-in pool. The MCP server returns the events alongside per-event `voice_name` + `voice_directive` strings; the calling LLM does the rewriting.
+
+Three assignment strategies:
+
+- **`thematic`** (default) — score each voice's tags against the event title (lowercase substring scan), pick the highest-scoring unused voice. Falls back to a seeded shuffle when no tag matches. Examples: a DMV renewal lands on Kafka; a final exam lands on Plath / McCarthy / Marcus Aurelius; a weekly standup lands on a noir detective or NYC doorman.
+- **`shuffled`** — Fisher-Yates shuffle of the pool with a deterministic `seed` (default `42`), assigned in order. Distinct voice per event when pool ≥ event count.
+- **`sequential`** — voices in declared order; cycles when event count exceeds pool size. Useful for a stable "this voice means this slot" mapping.
+
+When `event_count > voice_pool.length` and the strategy is non-sequential, distinctness becomes impossible by pigeonhole; the trailing events cycle through the (shuffled) pool and the response sets `pool_exhausted_warning: true`.
+
+Pass `voice_pool: ["Hemingway", "Kafka", ...]` to restrict assignment to a subset (every name must be in the built-in pool — unknown names error). Pass `include_mortality: true` to also attach `life_percent_consumed` per event using the same 80yr / 16h baseline as `mortality_overlay` (no lifespan params here — that's `mortality_overlay`'s job; this is a "for free" hint). See `docs/screenshots/35-voices.png` for a sample render.
 
 ## Memento Mori
 

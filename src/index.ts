@@ -4,6 +4,7 @@ import { formatUserFacingError } from "./errors.js";
 import { createEvent } from "./tools/create-event.js";
 import { deleteEvent } from "./tools/delete-event.js";
 import { listCalendars } from "./tools/list-calendars.js";
+import { listEventsInMixedPersonas } from "./tools/list-events-in-mixed-personas.js";
 import { listEventsInPersona } from "./tools/list-events-in-persona.js";
 import { listEvents } from "./tools/list-events.js";
 import { mortalityOverlay } from "./tools/mortality-overlay.js";
@@ -13,6 +14,8 @@ import { updateEvent } from "./tools/update-event.js";
 import {
   CreateEventInput,
   DeleteEventInput,
+  ListEventsInMixedPersonasInput,
+  ListEventsInMixedPersonasInputObject,
   ListEventsInPersonaInput,
   ListEventsInPersonaInputObject,
   ListEventsInput,
@@ -178,6 +181,24 @@ async function main(): Promise<void> {
       try {
         const parsed = ListEventsInPersonaInput.parse(args);
         return ok(await listEventsInPersona(parsed));
+      } catch (err) {
+        return fail(err);
+      }
+    },
+  );
+
+  server.registerTool(
+    "list_events_in_mixed_personas",
+    {
+      title: "List events in mixed personas",
+      description:
+        "Wraps list_events and assigns a distinct voice from a 30+ pool to each event (no two events share a voice). Optional thematic mapping (DMV->Kafka, exam->Plath, etc.). Distinct-voice mortality calendar.",
+      inputSchema: ListEventsInMixedPersonasInputObject.shape,
+    },
+    async (args) => {
+      try {
+        const parsed = ListEventsInMixedPersonasInput.parse(args);
+        return ok(await listEventsInMixedPersonas(parsed));
       } catch (err) {
         return fail(err);
       }

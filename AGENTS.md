@@ -6,7 +6,7 @@ Telegraph style. Root rules only. This file is for AI coding agents opening this
 
 - **Name:** `apple-calendar-mcp`
 - **Purpose:** MCP server exposing macOS Calendar.app to Claude (and any other MCP client) via AppleScript.
-- **Scope:** single-package, single-binary CLI. Ten tools. Stdio transport only.
+- **Scope:** single-package, single-binary CLI. Fifteen tools. Stdio transport only.
 - **Platform:** macOS only (`package.json` declares `"os": ["darwin"]`).
 - **Runtime:** Node 22.14+.
 - **Package manager:** pnpm 10.33.0 (see `packageManager` field).
@@ -22,6 +22,8 @@ src/
   types.ts              # zod schemas for all tool inputs/outputs
   personas.ts           # built-in persona directives for list_events_in_persona
   voices.ts             # built-in 30+ voice pool for list_events_in_mixed_personas
+  characters.ts         # relational character pool (Mom/Friend/Coach/...) for character-reminder tools
+  memory.ts             # ~/.apple-calendar-mcp/memory.json layer + queryByPerson/Topic/DateRange/recentSimilarEvents
   tools/
     list-calendars.ts
     list-events.ts      # buildListEventsScript + parseEventsOutput + listEvents
@@ -33,6 +35,11 @@ src/
     list-events-in-persona.ts   # events + persona directive for LLM rewrite
     list-events-in-mixed-personas.ts # distinct-voice-per-event from 30+ pool (thematic/shuffled/sequential)
     mortality-overlay.ts        # events annotated with life_percent_consumed (memento mori)
+    seed-calendar-memory.ts             # snapshot past events into ~/.apple-calendar-mcp/memory.json
+    query-calendar-memory.ts            # by_person / by_topic / by_date_range / by_calendar / similar_to / all
+    enrich-with-character-reminders.ts  # events + character_label + character_directive + memory_context per event
+    apply-character-reminders.ts        # mutate titles, embed backup block in notes, write snapshot
+    revert-character-reminders.ts       # restore originals from backup blocks across writable calendars
   util/
     concurrency.ts      # mapWithConcurrency, shared bounded fan-out helper
 test/
@@ -168,3 +175,18 @@ Do not land a PR with a failing gate. Do not disable rules to silence a legitima
 When adding a new built-in persona to `src/personas.ts`, include an explicit `**Variation:**` clause in the directive that lists 4–6 alternative openers and tells Claude to rotate them. Personas that lock to a single opener compress the joke to a single hit; voice should be constant, cadence should rotate. See the comment block at the top of `src/personas.ts` for the principle. The test in `test/list-events-in-persona.test.ts` enforces that every built-in directive contains the literal substring `Variation:`.
 
 The same principle applies to voices in `src/voices.ts` (used by `list_events_in_mixed_personas`). Each voice's `directive` is shorter (≤300 chars), but must still mention "Vary"/"vary"/"rotate"/"≤30%" or similar variation guidance — `test/list-events-in-mixed-personas.test.ts` enforces this. Voice/tone is the constant; cadence rotates.
+
+## Character conventions
+
+Characters in `src/characters.ts` are different from personas/voices. They are _relational_ figures (Mom, Friend, Coach, Therapist, Past-you, Future-you, Werner, Aurelius, Barkeep, Old friend, 夫子, Dog) used by the character-reminder tooling. Each character has:
+
+- `name` — unique attribution label
+- `short_label` — ≤16 chars, embedded into the calendar title via `{title} — {short_label}: {sentence}`
+- `directive` — ≤300 chars. MUST instruct Claude to reference at least one item from the supplied `memory_context` and to vary openers across events. The test in `test/characters.test.ts` enforces a `memory|reference|past|prior|last time|context|streak|pattern|item` regex.
+- `triggers?` — lowercase substring keywords that match against event title/notes/location for thematic assignment. Non-default characters must declare at least one trigger.
+
+Characters do NOT need to be unique-per-event (unlike voices in mixed-personas). Mom can leave several reminders in one week — that's the point. The punch lives in the memory reference, not in tonal variety.
+
+Memory layer (`src/memory.ts`) is the load-bearing piece: `~/.apple-calendar-mcp/memory.json` (`mode 0600`, parent dir `0700`), seeded by `seed_calendar_memory`, queried by `query_calendar_memory`, and consumed by `enrich_with_character_reminders` via `recentSimilarEvents`. Atomic writes via `.tmp + rename`. Schema is versioned (`version: 1`) so a future migration can detect old files.
+
+Apply / revert contract: `apply_character_reminders` embeds a backup block (`---ORIGINAL_TITLE_BACKUP_v1---` + JSON + `---END_ORIGINAL_TITLE_BACKUP_v1---`) at the bottom of the event's notes AND writes a snapshot to `~/.apple-calendar-mcp/last_apply_backup_<unix_ts>.json`. `revert_character_reminders` scans for the backup sentinel, restores the captured fields, and strips the block. Never nest backup blocks — `notesWithBackup` is a no-op when one already exists.

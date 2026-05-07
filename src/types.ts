@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { BUILT_IN_CHARACTER_NAMES } from "./characters.js";
 import { BUILT_IN_PERSONA_NAMES } from "./personas.js";
 
 const isoDate = z.string().refine((s) => !Number.isNaN(Date.parse(s)), {
@@ -251,3 +252,173 @@ export type ListEventsInPersonaResult = z.infer<typeof ListEventsInPersonaOutput
 export type MortalityOverlayArgs = z.infer<typeof MortalityOverlayInput>;
 export type MortalityOverlayEvent = z.infer<typeof MortalityOverlayEventSchema>;
 export type MortalityOverlayResult = z.infer<typeof MortalityOverlayOutput>;
+
+// ----- Character-reminder + memory tooling -----
+
+const CharacterName = z.enum([...BUILT_IN_CHARACTER_NAMES] as unknown as [string, ...string[]]);
+
+export const SeedCalendarMemoryInput = z.object({
+  start_date: isoDate.optional(),
+  end_date: isoDate.optional(),
+  calendars: z.array(z.string().max(256)).max(64).optional(),
+});
+
+export const SeedCalendarMemoryOutput = z.object({
+  total_events_seeded: z.number().int(),
+  per_calendar: z.array(z.object({ calendar: z.string(), event_count: z.number().int() })),
+  window: z.object({ start: z.string(), end: z.string() }),
+  memory_path: z.string(),
+  memory_file_size_bytes: z.number().int(),
+});
+
+export const QueryCalendarMemoryInputObject = z.object({
+  query_type: z.enum([
+    "by_person",
+    "by_topic",
+    "by_date_range",
+    "by_calendar",
+    "similar_to",
+    "all",
+  ]),
+  query_string: z.string().max(256).optional(),
+  start_date: isoDate.optional(),
+  end_date: isoDate.optional(),
+  calendar_name: z.string().max(256).optional(),
+  event: z
+    .object({
+      title: z.string(),
+      calendar: z.string().optional(),
+      start: isoDate.optional(),
+    })
+    .optional(),
+  limit: z.number().int().min(1).max(1000).default(50),
+});
+
+export const QueryCalendarMemoryInput = QueryCalendarMemoryInputObject.refine(
+  (v) => {
+    if (v.query_type === "by_person" || v.query_type === "by_topic") {
+      return Boolean(v.query_string && v.query_string.trim().length > 0);
+    }
+    if (v.query_type === "by_date_range") {
+      return Boolean(v.start_date && v.end_date);
+    }
+    if (v.query_type === "by_calendar") {
+      return Boolean(v.calendar_name && v.calendar_name.trim().length > 0);
+    }
+    if (v.query_type === "similar_to") {
+      return Boolean(v.event && v.event.title.trim().length > 0);
+    }
+    return true;
+  },
+  { message: "Required parameters missing for the chosen query_type" },
+);
+
+const MemoryEventSchema = z.object({
+  uid: z.string(),
+  title: z.string(),
+  start: z.string(),
+  end: z.string(),
+  duration_hours: z.number(),
+  calendar: z.string(),
+  notes: z.string().optional(),
+  attended: z.boolean().optional(),
+  observations: z.array(z.string()).optional(),
+});
+
+export const QueryCalendarMemoryOutput = z.object({
+  matches: z.array(MemoryEventSchema),
+  total_in_memory: z.number().int(),
+  query_summary: z.string(),
+});
+
+export const EnrichWithCharacterRemindersInputObject = z.object({
+  start_date: isoDate,
+  end_date: isoDate,
+  calendars: z.array(z.string().max(256)).max(20).optional(),
+  character_pool: z.array(CharacterName).max(64).optional(),
+  include_memory_context: z.boolean().default(true),
+  memory_context_size: z.number().int().min(0).max(20).default(3),
+  seed: z.number().int().default(42),
+});
+
+export const EnrichWithCharacterRemindersInput = EnrichWithCharacterRemindersInputObject.refine(
+  (v) => Date.parse(v.end_date) > Date.parse(v.start_date),
+  {
+    message: "end_date must be strictly after start_date",
+    path: ["end_date"],
+  },
+);
+
+export const EnrichedCharacterEventSchema = EventSchema.extend({
+  character_label: z.string(),
+  character_directive: z.string(),
+  memory_context: z.array(MemoryEventSchema),
+  rewrite_instruction: z.string(),
+});
+
+export const EnrichWithCharacterRemindersOutput = z.object({
+  events: z.array(EnrichedCharacterEventSchema),
+  characters_used: z.array(z.string()),
+  rewrite_template: z.string(),
+});
+
+export const ApplyCharacterRemindersInput = z.object({
+  events_with_reminders: z
+    .array(
+      z.object({
+        uid: z.string().min(1),
+        calendar: z.string().min(1),
+        new_title: z.string().min(1).max(500),
+        new_notes: z.string().max(8000).optional(),
+      }),
+    )
+    .min(1)
+    .max(200),
+  dry_run: z.boolean().default(false),
+});
+
+export const ApplyCharacterRemindersOutput = z.object({
+  applied: z.array(
+    z.object({
+      uid: z.string(),
+      calendar: z.string(),
+      ok: z.boolean(),
+      new_title: z.string().optional(),
+      backup_pointer: z.string().optional(),
+      error: z.string().optional(),
+    }),
+  ),
+  backup_path: z.string().optional(),
+  dry_run: z.boolean(),
+});
+
+export const RevertCharacterRemindersInput = z.object({
+  start_date: isoDate.optional(),
+  end_date: isoDate.optional(),
+  calendars: z.array(z.string().max(256)).max(20).optional(),
+});
+
+export const RevertCharacterRemindersOutput = z.object({
+  reverted: z.array(
+    z.object({
+      uid: z.string(),
+      calendar: z.string(),
+      ok: z.boolean(),
+      restored_title: z.string().optional(),
+      error: z.string().optional(),
+    }),
+  ),
+  total_with_backup: z.number().int(),
+});
+
+export type SeedCalendarMemoryArgs = z.infer<typeof SeedCalendarMemoryInput>;
+export type SeedCalendarMemoryResult = z.infer<typeof SeedCalendarMemoryOutput>;
+export type QueryCalendarMemoryArgs = z.infer<typeof QueryCalendarMemoryInput>;
+export type QueryCalendarMemoryResult = z.infer<typeof QueryCalendarMemoryOutput>;
+export type EnrichWithCharacterRemindersArgs = z.infer<typeof EnrichWithCharacterRemindersInput>;
+export type EnrichedCharacterEvent = z.infer<typeof EnrichedCharacterEventSchema>;
+export type EnrichWithCharacterRemindersResult = z.infer<typeof EnrichWithCharacterRemindersOutput>;
+export type ApplyCharacterRemindersArgs = z.infer<typeof ApplyCharacterRemindersInput>;
+export type ApplyCharacterRemindersResult = z.infer<typeof ApplyCharacterRemindersOutput>;
+export type RevertCharacterRemindersArgs = z.infer<typeof RevertCharacterRemindersInput>;
+export type RevertCharacterRemindersResult = z.infer<typeof RevertCharacterRemindersOutput>;

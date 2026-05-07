@@ -1,19 +1,27 @@
 import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { StdioServerTransport } from "@modelcontextprotocol/sdk/server/stdio.js";
 import { formatUserFacingError } from "./errors.js";
+import { applyCharacterReminders } from "./tools/apply-character-reminders.js";
 import { createEvent } from "./tools/create-event.js";
 import { deleteEvent } from "./tools/delete-event.js";
+import { enrichWithCharacterReminders } from "./tools/enrich-with-character-reminders.js";
 import { listCalendars } from "./tools/list-calendars.js";
 import { listEventsInMixedPersonas } from "./tools/list-events-in-mixed-personas.js";
 import { listEventsInPersona } from "./tools/list-events-in-persona.js";
 import { listEvents } from "./tools/list-events.js";
 import { mortalityOverlay } from "./tools/mortality-overlay.js";
+import { runMemoryQuery } from "./tools/query-calendar-memory.js";
+import { revertCharacterReminders } from "./tools/revert-character-reminders.js";
 import { searchEvents } from "./tools/search-events.js";
+import { seedCalendarMemory } from "./tools/seed-calendar-memory.js";
 import { timePerCalendar } from "./tools/time-per-calendar.js";
 import { updateEvent } from "./tools/update-event.js";
 import {
+  ApplyCharacterRemindersInput,
   CreateEventInput,
   DeleteEventInput,
+  EnrichWithCharacterRemindersInput,
+  EnrichWithCharacterRemindersInputObject,
   ListEventsInMixedPersonasInput,
   ListEventsInMixedPersonasInputObject,
   ListEventsInPersonaInput,
@@ -21,7 +29,11 @@ import {
   ListEventsInput,
   MortalityOverlayInput,
   MortalityOverlayInputObject,
+  QueryCalendarMemoryInput,
+  QueryCalendarMemoryInputObject,
+  RevertCharacterRemindersInput,
   SearchEventsInput,
+  SeedCalendarMemoryInput,
   TimePerCalendarInput,
   TimePerCalendarInputObject,
   UpdateEventInput,
@@ -217,6 +229,96 @@ async function main(): Promise<void> {
       try {
         const parsed = MortalityOverlayInput.parse(args);
         return ok(await mortalityOverlay(parsed));
+      } catch (err) {
+        return fail(err);
+      }
+    },
+  );
+
+  server.registerTool(
+    "seed_calendar_memory",
+    {
+      title: "Seed calendar memory",
+      description:
+        "Snapshot past events from writable calendars into ~/.apple-calendar-mcp/memory.json so character reminders can reference real prior events. Defaults to the last 5 years.",
+      inputSchema: SeedCalendarMemoryInput.shape,
+    },
+    async (args) => {
+      try {
+        const parsed = SeedCalendarMemoryInput.parse(args);
+        return ok(await seedCalendarMemory(parsed));
+      } catch (err) {
+        return fail(err);
+      }
+    },
+  );
+
+  server.registerTool(
+    "query_calendar_memory",
+    {
+      title: "Query calendar memory",
+      description:
+        "Read seeded calendar memory by person, topic, date range, calendar, similarity to a synthetic event, or all. Returns matches plus total_in_memory.",
+      inputSchema: QueryCalendarMemoryInputObject.shape,
+    },
+    async (args) => {
+      try {
+        const parsed = QueryCalendarMemoryInput.parse(args);
+        return ok(runMemoryQuery(parsed));
+      } catch (err) {
+        return fail(err);
+      }
+    },
+  );
+
+  server.registerTool(
+    "enrich_with_character_reminders",
+    {
+      title: "Enrich with character reminders",
+      description:
+        "List events in a window and attach a relational character (Mom, Friend, Coach, Past-you, etc.) plus per-event memory_context drawn from seeded memory, so Claude can compose one-sentence reminders that reference real prior events.",
+      inputSchema: EnrichWithCharacterRemindersInputObject.shape,
+    },
+    async (args) => {
+      try {
+        const parsed = EnrichWithCharacterRemindersInput.parse(args);
+        return ok(await enrichWithCharacterReminders(parsed));
+      } catch (err) {
+        return fail(err);
+      }
+    },
+  );
+
+  server.registerTool(
+    "apply_character_reminders",
+    {
+      title: "Apply character reminders",
+      description:
+        "Mutate calendar event titles using Claude-composed `new_title` strings. Stores the original title/notes/location inside the event's notes (backup block) and writes a snapshot file for batch revert. Supports dry_run.",
+      inputSchema: ApplyCharacterRemindersInput.shape,
+    },
+    async (args) => {
+      try {
+        const parsed = ApplyCharacterRemindersInput.parse(args);
+        return ok(await applyCharacterReminders(parsed));
+      } catch (err) {
+        return fail(err);
+      }
+    },
+  );
+
+  server.registerTool(
+    "revert_character_reminders",
+    {
+      title: "Revert character reminders",
+      description:
+        "Find every event in the window whose notes contain the backup sentinel, restore the original title/notes/location, and remove the backup block. If no window is given, scans -5y..+1y across writable calendars.",
+      inputSchema: RevertCharacterRemindersInput.shape,
+    },
+    async (args) => {
+      try {
+        const parsed = RevertCharacterRemindersInput.parse(args);
+        return ok(await revertCharacterReminders(parsed));
       } catch (err) {
         return fail(err);
       }

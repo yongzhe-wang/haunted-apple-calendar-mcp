@@ -6,7 +6,7 @@ Telegraph style. Root rules only. This file is for AI coding agents opening this
 
 - **Name:** `apple-calendar-mcp`
 - **Purpose:** MCP server exposing macOS Calendar.app to Claude (and any other MCP client) via AppleScript.
-- **Scope:** single-package, single-binary CLI. Six tools. Stdio transport only.
+- **Scope:** single-package, single-binary CLI. Nine tools. Stdio transport only.
 - **Platform:** macOS only (`package.json` declares `"os": ["darwin"]`).
 - **Runtime:** Node 22.14+.
 - **Package manager:** pnpm 10.33.0 (see `packageManager` field).
@@ -27,6 +27,11 @@ src/
     create-event.ts     # buildCreateEventScript + createEvent
     update-event.ts     # buildUpdateEventScript + updateEvent
     delete-event.ts     # buildDeleteEventScript + deleteEvent
+    time-per-calendar.ts        # aggregate event durations per calendar
+    list-events-in-persona.ts   # events + persona directive for LLM rewrite
+    mortality-overlay.ts        # events annotated with life_percent_consumed (memento mori)
+  util/
+    concurrency.ts      # mapWithConcurrency, shared bounded fan-out helper
 test/
   applescript.test.ts   # escape/date/parse helpers
   tools.test.ts         # per-tool script builders + parsers + schemas

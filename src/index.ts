@@ -6,6 +6,7 @@ import { deleteEvent } from "./tools/delete-event.js";
 import { listCalendars } from "./tools/list-calendars.js";
 import { listEventsInPersona } from "./tools/list-events-in-persona.js";
 import { listEvents } from "./tools/list-events.js";
+import { mortalityOverlay } from "./tools/mortality-overlay.js";
 import { searchEvents } from "./tools/search-events.js";
 import { timePerCalendar } from "./tools/time-per-calendar.js";
 import { updateEvent } from "./tools/update-event.js";
@@ -15,6 +16,8 @@ import {
   ListEventsInPersonaInput,
   ListEventsInPersonaInputObject,
   ListEventsInput,
+  MortalityOverlayInput,
+  MortalityOverlayInputObject,
   SearchEventsInput,
   TimePerCalendarInput,
   TimePerCalendarInputObject,
@@ -175,6 +178,24 @@ async function main(): Promise<void> {
       try {
         const parsed = ListEventsInPersonaInput.parse(args);
         return ok(await listEventsInPersona(parsed));
+      } catch (err) {
+        return fail(err);
+      }
+    },
+  );
+
+  server.registerTool(
+    "mortality_overlay",
+    {
+      title: "Mortality overlay",
+      description:
+        "Wraps list_events and attaches a per-event life_percent_consumed (and cumulative running total) so callers can frame each event as a fraction of an expected lifetime. Memento mori overlay.",
+      inputSchema: MortalityOverlayInputObject.shape,
+    },
+    async (args) => {
+      try {
+        const parsed = MortalityOverlayInput.parse(args);
+        return ok(await mortalityOverlay(parsed));
       } catch (err) {
         return fail(err);
       }

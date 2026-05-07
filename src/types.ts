@@ -152,6 +152,50 @@ export const ListEventsInPersonaOutput = z.object({
   rewrite_instructions: z.string(),
 });
 
+// Memento mori overlay. Wraps list_events and attaches a per-event
+// life_percent_consumed plus a cumulative running total. Caps mirror the
+// persona tool so a hostile caller can't fan out unbounded per-calendar
+// osascript queries.
+export const MortalityOverlayInputObject = z.object({
+  start_date: isoDate,
+  end_date: isoDate,
+  expected_lifespan_years: z.number().min(1).max(150).default(80),
+  waking_hours_per_day: z.number().min(1).max(24).default(16),
+  calendars: z.array(z.string().max(256)).max(20).optional(),
+  birth_date: isoDate.optional(),
+});
+
+export const MortalityOverlayInput = MortalityOverlayInputObject.refine(
+  (v) => Date.parse(v.end_date) > Date.parse(v.start_date),
+  {
+    message: "end_date must be strictly after start_date",
+    path: ["end_date"],
+  },
+);
+
+export const MortalityOverlayEventSchema = EventSchema.extend({
+  duration_hours: z.number(),
+  life_percent_consumed: z.number(),
+  life_percent_consumed_cumulative: z.number(),
+  pct_of_remaining_life: z.number().optional(),
+});
+
+export const MortalityOverlayOutput = z.object({
+  baseline: z.object({
+    expected_lifespan_years: z.number(),
+    waking_hours_per_day: z.number(),
+    total_waking_hours: z.number(),
+    birth_date: z.string().optional(),
+  }),
+  events: z.array(MortalityOverlayEventSchema),
+  totals: z.object({
+    event_count: z.number().int(),
+    total_hours: z.number(),
+    total_life_percent: z.number(),
+    total_pct_of_remaining_life: z.number().optional(),
+  }),
+});
+
 export type ListEventsArgs = z.infer<typeof ListEventsInput>;
 export type SearchEventsArgs = z.infer<typeof SearchEventsInput>;
 export type CreateEventArgs = z.infer<typeof CreateEventInput>;
@@ -162,3 +206,6 @@ export type TimePerCalendarBucket = z.infer<typeof TimePerCalendarBucketSchema>;
 export type TimePerCalendarResult = z.infer<typeof TimePerCalendarOutput>;
 export type ListEventsInPersonaArgs = z.infer<typeof ListEventsInPersonaInput>;
 export type ListEventsInPersonaResult = z.infer<typeof ListEventsInPersonaOutput>;
+export type MortalityOverlayArgs = z.infer<typeof MortalityOverlayInput>;
+export type MortalityOverlayEvent = z.infer<typeof MortalityOverlayEventSchema>;
+export type MortalityOverlayResult = z.infer<typeof MortalityOverlayOutput>;

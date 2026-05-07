@@ -2,7 +2,7 @@
 
 These rules apply whenever Claude (or any AI assistant) manages calendar events in this user's Apple Calendar / iOS Calendar via apple-calendar-mcp.
 
-Last updated: 2026-04-21
+Last updated: 2026-04-25
 
 ## Tool usage
 
@@ -42,6 +42,9 @@ Last updated: 2026-04-21
 
 ## Operational notes
 
+- Always refetch the current date AND time-of-day via `osascript -e 'return (current date) as string'` before interpreting "today", "tonight", "tomorrow", "this morning", "this weekend", "in an hour", "now", or any other relative time reference. The session may have started on a previous day; system context can become stale; and relative references like "tonight" and "this morning" depend on the actual current clock time, not just the date. Do not rely on conversational memory or earlier system reminders. User re-confirmed this rule on 2026-04-24 after scheduling ambiguity.
+- After running the date/time refetch, always explicitly compare the returned wall-clock value against any "today / tomorrow / tonight / this/next weekend" reference in the user's message before acting. Read the osascript output, state to yourself the actual day-of-week and date, then resolve any relative references against THAT value — not against the session's earlier remembered date. Sessions that span midnight or stretch over multiple days have caused mis-scheduled events: e.g., on 2026-04-25 a meeting referenced as "tmr" was incorrectly placed on the same day because the assistant ran osascript but did not re-anchor its reasoning. Verification without re-anchoring is theater.
+- Always re-read `clude.txt` before any calendar operation, in case the rules have changed since the last read within this session. Prefer the live file over remembered rules.
 - If an update_event call fails with -10025 "Object not found. It may have been deleted." after a move-between-calendars operation, search Calendar.app by title fragment to locate the event — the event may have landed in the target calendar with a new UID.
 - Before bulk-creating events, list_calendars first to confirm the target calendar name exists (case-sensitive, spaces matter — e.g., "Entertainment " has a trailing space).
 - After creating or moving events, verify via list_events on the exact time window to confirm the event is visible.

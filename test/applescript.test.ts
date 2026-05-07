@@ -38,10 +38,31 @@ describe("escapeAppleScriptString", () => {
     expect(escapeAppleScriptString("")).toBe('""');
   });
 
-  it("preserves unicode and newlines without breaking quoting", () => {
+  it("preserves unicode and escapes newlines without breaking quoting", () => {
     const input = "café\n中文";
     const escaped = escapeAppleScriptString(input);
-    expect(escaped).toBe('"café\n中文"');
+    expect(escaped).toBe('"café\\n中文"');
+  });
+
+  it("escapes a bare line feed as backslash-n", () => {
+    expect(escapeAppleScriptString("a\nb")).toBe('"a\\nb"');
+  });
+
+  it("escapes a bare carriage return as backslash-r", () => {
+    expect(escapeAppleScriptString("a\rb")).toBe('"a\\rb"');
+  });
+
+  it("escapes Windows-style CRLF as backslash-r backslash-n", () => {
+    expect(escapeAppleScriptString("a\r\nb")).toBe('"a\\r\\nb"');
+  });
+
+  it("escapes a mix of backslash, double-quote, and newline correctly", () => {
+    // Order matters: \ first, then ", then \n. A naive impl that escapes
+    // \n before \\ would emit `\\n` (escaped backslash + literal n) which
+    // is not a newline escape sequence at all.
+    const input = 'a\\b"c\nd';
+    const escaped = escapeAppleScriptString(input);
+    expect(escaped).toBe('"a\\\\b\\"c\\nd"');
   });
 });
 

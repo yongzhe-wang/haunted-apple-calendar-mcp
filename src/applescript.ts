@@ -55,7 +55,17 @@ function buildFriendlyMessage(detail: string): string {
 }
 
 export function escapeAppleScriptString(s: string): string {
-  const escaped = s.replace(/\\/g, "\\\\").replace(/"/g, '\\"');
+  // Order matters: backslash first (otherwise the \n / \r replacements below
+  // would themselves get double-escaped), then double-quote, then newlines.
+  // A literal newline inside an AppleScript "..." literal terminates the
+  // string and produces a syntax error from osascript, so the \n / \r
+  // replacements are required for inputs that may contain line breaks
+  // (calendar names, notes, etc.).
+  const escaped = s
+    .replace(/\\/g, "\\\\")
+    .replace(/"/g, '\\"')
+    .replace(/\n/g, "\\n")
+    .replace(/\r/g, "\\r");
   return `"${escaped}"`;
 }
 

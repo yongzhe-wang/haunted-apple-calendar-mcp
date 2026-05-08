@@ -1,8 +1,24 @@
 # Changelog
 
-All notable changes to `apple-calendar-mcp` are documented here.
+All notable changes to `heckle-mcp` (formerly `apple-calendar-mcp`) are documented here.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
+
+## [0.2.0] - 2026-05-07
+
+### Renamed
+
+- Package: `apple-calendar-mcp` → `heckle-mcp` (binary `heckle`).
+- Server identity (`McpServer` name) and stderr log prefix updated to `heckle-mcp`.
+- Internal data directory **kept** at `~/.apple-calendar-mcp/` (memory.json + characters.json) so existing user state survives the rename. Will migrate in a future release with a one-shot copy-on-first-run.
+
+### Added
+
+- 5 new MCP tools: `seed_calendar_memory`, `query_calendar_memory`, `enrich_with_character_reminders`, `apply_character_reminders`, `revert_character_reminders`.
+- Custom character config layer: `~/.apple-calendar-mcp/characters.json` plus inline `custom_characters` argument.
+- 4 voice/persona/mortality tools previously shipped in 0.1.x: `list_events_in_persona`, `list_events_in_mixed_personas`, `time_per_calendar`, `mortality_overlay`.
+- OpenCloud-style governance docs: `CONTRIBUTING.md`, `SECURITY.md`, `CODE_OF_CONDUCT.md`, `.github/ISSUE_TEMPLATE/{bug,feature}.yml`, `.github/PULL_REQUEST_TEMPLATE.md`.
+- New `docs/` folder: architecture, permissions, full tool reference, examples, troubleshooting, three ADRs (stdio, AppleScript-only, uid-as-id), logo SVG.
 
 ## [Unreleased]
 

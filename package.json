@@ -1,16 +1,18 @@
 {
-  "name": "apple-calendar-mcp",
-  "version": "0.1.0",
-  "description": "MCP server for macOS Calendar.app — list, search, create, update, delete events from Claude Code and any MCP client.",
+  "name": "heckle-mcp",
+  "version": "0.2.0",
+  "description": "Heckle: an MCP server that lets the people who know you comment on every event in your Apple Calendar. Built-in characters, custom characters, persistent memory.",
   "keywords": [
+    "apple-calendar",
     "applescript",
     "calendar",
+    "characters",
     "claude",
-    "claude-code",
-    "eventkit",
     "macos",
     "mcp",
-    "model-context-protocol"
+    "memento-mori",
+    "memory",
+    "personas"
   ],
   "homepage": "https://github.com/yongzhe-wang/apple-calendar-mcp#readme",
   "bugs": {
@@ -23,7 +25,7 @@
     "url": "git+https://github.com/yongzhe-wang/apple-calendar-mcp.git"
   },
   "bin": {
-    "apple-calendar-mcp": "dist/index.js"
+    "heckle": "dist/index.js"
   },
   "files": [
     "CHANGELOG.md",

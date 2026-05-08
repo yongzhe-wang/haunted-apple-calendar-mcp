@@ -69,7 +69,7 @@ export async function revertCharacterReminders(
     } catch (err) {
       const detail = err instanceof Error ? err.message : String(err);
       process.stderr.write(
-        `[apple-calendar-mcp] revert_character_reminders: "${name}" scan failed: ${detail.slice(0, 500)}\n`,
+        `[heckle-mcp] revert_character_reminders: "${name}" scan failed: ${detail.slice(0, 500)}\n`,
       );
       return [];
     }

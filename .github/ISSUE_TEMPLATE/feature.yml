@@ -1,0 +1,16 @@
+name: Feature request
+description: Suggest an idea
+labels: [enhancement]
+body:
+  - type: textarea
+    id: what
+    attributes:
+      label: The idea
+      placeholder: I want HECKLE to be able to ...
+    validations:
+      required: true
+  - type: textarea
+    id: why
+    attributes:
+      label: Why
+      placeholder: It would let me ...

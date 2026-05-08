@@ -47,7 +47,7 @@ function ok(data: unknown): { content: ToolContent[] } {
 
 function fail(err: unknown): { content: ToolContent[]; isError: true } {
   // Stderr only — stdout is the MCP transport channel.
-  process.stderr.write(`[apple-calendar-mcp] ${String(err)}\n`);
+  process.stderr.write(`[heckle-mcp] ${String(err)}\n`);
   return {
     content: [{ type: "text", text: formatUserFacingError(err) }],
     isError: true,
@@ -57,8 +57,8 @@ function fail(err: unknown): { content: ToolContent[]; isError: true } {
 async function main(): Promise<void> {
   const server = new McpServer(
     {
-      name: "apple-calendar-mcp",
-      version: "0.1.0",
+      name: "heckle-mcp",
+      version: "0.2.0",
     },
     {
       capabilities: { tools: {} },
@@ -344,10 +344,10 @@ async function main(): Promise<void> {
 
   const transport = new StdioServerTransport();
   await server.connect(transport);
-  process.stderr.write("[apple-calendar-mcp] ready on stdio\n");
+  process.stderr.write("[heckle-mcp] ready on stdio\n");
 }
 
 main().catch((err) => {
-  process.stderr.write(`[apple-calendar-mcp] fatal: ${String(err)}\n`);
+  process.stderr.write(`[heckle-mcp] fatal: ${String(err)}\n`);
   process.exit(1);
 });

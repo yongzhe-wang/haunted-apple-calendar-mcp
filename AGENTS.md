@@ -1,10 +1,12 @@
 # AGENTS.md
 
+**The brand:** Heckle — your calendar, with a peanut gallery.
+
 Telegraph style. Root rules only. This file is for AI coding agents opening this repo.
 
 ## Project
 
-- **Name:** `apple-calendar-mcp`
+- **Name:** HECKLE (`heckle-mcp`)
 - **Purpose:** MCP server exposing macOS Calendar.app to Claude (and any other MCP client) via AppleScript.
 - **Scope:** single-package, single-binary CLI. Fifteen tools. Stdio transport only.
 - **Platform:** macOS only (`package.json` declares `"os": ["darwin"]`).

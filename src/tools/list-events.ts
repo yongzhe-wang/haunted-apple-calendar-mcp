@@ -339,7 +339,7 @@ export async function listEvents(args: ListEventsArgs): Promise<CalendarEvent[]>
         const detail =
           result.reason instanceof Error ? result.reason.message : String(result.reason);
         process.stderr.write(
-          `[apple-calendar-mcp] list_events: calendar "${name}" failed: ${detail.slice(0, 500)}\n`,
+          `[heckle-mcp] list_events: calendar "${name}" failed: ${detail.slice(0, 500)}\n`,
         );
       }
     });

@@ -69,7 +69,7 @@ export async function revertCharacterReminders(
     } catch (err) {
       const detail = err instanceof Error ? err.message : String(err);
       process.stderr.write(
-        `[heckle-mcp] revert_character_reminders: "${name}" scan failed: ${detail.slice(0, 500)}\n`,
+        `[haunted-mcp] revert_character_reminders: "${name}" scan failed: ${detail.slice(0, 500)}\n`,
       );
       return [];
     }

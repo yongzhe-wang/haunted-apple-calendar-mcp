@@ -1,31 +1,32 @@
 {
-  "name": "heckle-mcp",
-  "version": "0.2.0",
-  "description": "Heckle: an MCP server that lets the people who know you comment on every event in your Apple Calendar. Built-in characters, custom characters, persistent memory.",
+  "name": "haunted-mcp",
+  "version": "0.2.1",
+  "description": "Haunted: an MCP server that lets the people who know you comment on every event in your Apple Calendar. Built-in characters, custom characters, persistent memory.",
   "keywords": [
     "apple-calendar",
     "applescript",
     "calendar",
     "characters",
     "claude",
+    "haunted",
     "macos",
     "mcp",
     "memento-mori",
     "memory",
     "personas"
   ],
-  "homepage": "https://github.com/yongzhe-wang/apple-calendar-mcp#readme",
+  "homepage": "https://github.com/yongzhe-wang/haunted-mcp#readme",
   "bugs": {
-    "url": "https://github.com/yongzhe-wang/apple-calendar-mcp/issues"
+    "url": "https://github.com/yongzhe-wang/haunted-mcp/issues"
   },
   "license": "MIT",
   "author": "Yongzhe Wang",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/yongzhe-wang/apple-calendar-mcp.git"
+    "url": "git+https://github.com/yongzhe-wang/haunted-mcp.git"
   },
   "bin": {
-    "heckle": "dist/index.js"
+    "haunted": "dist/index.js"
   },
   "files": [
     "CHANGELOG.md",

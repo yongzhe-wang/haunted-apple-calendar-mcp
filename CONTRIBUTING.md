@@ -1,6 +1,6 @@
-# Contributing to HECKLE
+# Contributing to HAUNTED
 
-Thanks for your interest. HECKLE is small enough that drive-by contributions are welcome.
+Thanks for your interest. HAUNTED is small enough that drive-by contributions are welcome.
 
 ## Quick checks before opening a PR
 

@@ -177,7 +177,7 @@ export async function applyCharacterReminders(
       });
     } catch (err) {
       process.stderr.write(
-        `[heckle-mcp] apply_character_reminders: failed to write backup snapshot at ${backupPath}: ${
+        `[haunted-mcp] apply_character_reminders: failed to write backup snapshot at ${backupPath}: ${
           err instanceof Error ? err.message : String(err)
         }\n`,
       );

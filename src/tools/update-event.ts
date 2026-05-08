@@ -464,7 +464,7 @@ async function runCopyThenDelete(
   } catch (err) {
     const detail = err instanceof Error ? err.message : String(err);
     process.stderr.write(
-      `[heckle-mcp] WARNING: copy-then-delete update created new event ${created.id} in "${canonicalTarget}", but failed to delete source event ${source.id} from "${source.calendar_name}": ${detail}. Duplicate event may exist; manual cleanup may be needed.\n`,
+      `[haunted-mcp] WARNING: copy-then-delete update created new event ${created.id} in "${canonicalTarget}", but failed to delete source event ${source.id} from "${source.calendar_name}": ${detail}. Duplicate event may exist; manual cleanup may be needed.\n`,
     );
   }
 

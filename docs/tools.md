@@ -1,6 +1,6 @@
 # Tool reference
 
-Fifteen MCP tools, four categories. Every tool returns a JSON object as a single text content block — that's the MCP convention HECKLE follows. Dates are ISO 8601 throughout (`2026-05-07T14:30:00Z` or `2026-05-07T10:30:00-07:00`).
+Fifteen MCP tools, four categories. Every tool returns a JSON object as a single text content block — that's the MCP convention HAUNTED follows. Dates are ISO 8601 throughout (`2026-05-07T14:30:00Z` or `2026-05-07T10:30:00-07:00`).
 
 ## CRUD
 
@@ -8,7 +8,7 @@ The original six tools. Read-and-write parity with Calendar.app.
 
 ### `list_calendars`
 
-List every calendar visible to Calendar.app on this Mac, with a `writable` flag that reflects whether HECKLE can mutate events on it (read-only subscribed calendars come back with `writable: false`).
+List every calendar visible to Calendar.app on this Mac, with a `writable` flag that reflects whether HAUNTED can mutate events on it (read-only subscribed calendars come back with `writable: false`).
 
 - **Inputs:** none.
 - **Output shape:** `{ calendars: [{ name: string, writable: boolean }] }`.

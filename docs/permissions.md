@@ -1,21 +1,21 @@
 # macOS permissions
 
-HECKLE drives Calendar.app via `osascript`. macOS treats that as automation, which is gated by the TCC (Transparency, Consent, and Control) subsystem. You'll see one or two permission prompts the first time HECKLE runs — accept them and you're done.
+HAUNTED drives Calendar.app via `osascript`. macOS treats that as automation, which is gated by the TCC (Transparency, Consent, and Control) subsystem. You'll see one or two permission prompts the first time HAUNTED runs — accept them and you're done.
 
-## What HECKLE needs
+## What HAUNTED needs
 
 | Permission                | Where                                                                              | Why                                                           |
 | ------------------------- | ---------------------------------------------------------------------------------- | ------------------------------------------------------------- |
 | **Automation → Calendar** | System Settings → Privacy & Security → Automation → _(controlling app)_ → Calendar | Lets `osascript` send Apple Events to Calendar.app. Required. |
 | **Calendars**             | System Settings → Privacy & Security → Calendars → _(controlling app)_             | Some macOS versions require this in addition to Automation.   |
-| **Full Disk Access**      | —                                                                                  | Not required. HECKLE never touches `~/Library/Calendars/`.    |
+| **Full Disk Access**      | —                                                                                  | Not required. HAUNTED never touches `~/Library/Calendars/`.   |
 | **Network**               | —                                                                                  | Not required. There is no network code path.                  |
 
-The "controlling app" is whichever process spawned `npx heckle-mcp`. If you launched Claude Code from Terminal.app, it's Terminal. If you launched it from iTerm or Warp or VS Code or Cursor, it's that. The permission is granted per-controlling-app, not per-`osascript`.
+The "controlling app" is whichever process spawned `npx haunted-mcp`. If you launched Claude Code from Terminal.app, it's Terminal. If you launched it from iTerm or Warp or VS Code or Cursor, it's that. The permission is granted per-controlling-app, not per-`osascript`.
 
 ## Step-by-step (first run)
 
-1. Add HECKLE to your MCP client config (see [README.md → Quickstart](../README.md#quickstart)).
+1. Add HAUNTED to your MCP client config (see [README.md → Quickstart](../README.md#quickstart)).
 2. Restart your MCP client.
 3. Ask Claude something that touches Calendar.app — `"What's on my calendar this week?"` is the canonical first prompt.
 4. macOS pops a dialog: **"Terminal/iTerm/Code/… wants access to control Calendar.app."** Click **OK**.
@@ -44,8 +44,8 @@ If the TCC database has gotten weird (rare, but possible after macOS upgrades), 
 tccutil reset AppleEvents com.apple.Terminal
 ```
 
-Then re-run any HECKLE tool to re-trigger the prompt.
+Then re-run any HAUNTED tool to re-trigger the prompt.
 
-## Why HECKLE asks for so little
+## Why HAUNTED asks for so little
 
-Local-only by construction. No network, no disk access outside `~/.apple-calendar-mcp/`. The Calendar.app TCC grant is the entire trust footprint — and it's Calendar.app that talks to iCloud, not HECKLE.
+Local-only by construction. No network, no disk access outside `~/.apple-calendar-mcp/`. The Calendar.app TCC grant is the entire trust footprint — and it's Calendar.app that talks to iCloud, not HAUNTED.

@@ -72,7 +72,7 @@ export async function seedCalendarMemory(
     } catch (err) {
       const detail = err instanceof Error ? err.message : String(err);
       process.stderr.write(
-        `[heckle-mcp] seed_calendar_memory: "${name}" failed: ${detail.slice(0, 500)}\n`,
+        `[haunted-mcp] seed_calendar_memory: "${name}" failed: ${detail.slice(0, 500)}\n`,
       );
       perCalendar.push({ calendar: name, event_count: 0 });
       return [];

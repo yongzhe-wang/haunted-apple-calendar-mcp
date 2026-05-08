@@ -1,8 +1,19 @@
 # Changelog
 
-All notable changes to `heckle-mcp` (formerly `apple-calendar-mcp`) are documented here.
+All notable changes to `haunted-mcp` (formerly `apple-calendar-mcp`, then `heckle-mcp`) are documented here.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
+
+## [0.2.1] - 2026-05-07
+
+### Renamed
+
+- `heckle-mcp` → `haunted-mcp` (binary `haunted`).
+- Tagline updated: "A calendar haunted by people who know you."
+
+### Note
+
+- Data directory `~/.apple-calendar-mcp/` is preserved across renames; user memory and custom characters survive.
 
 ## [0.2.0] - 2026-05-07
 

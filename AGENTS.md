@@ -1,18 +1,18 @@
 # AGENTS.md
 
-**The brand:** Heckle — your calendar, with a peanut gallery.
+**The brand:** Haunted — a calendar haunted by people who know you.
 
 Telegraph style. Root rules only. This file is for AI coding agents opening this repo.
 
 ## Project
 
-- **Name:** HECKLE (`heckle-mcp`)
+- **Name:** HAUNTED (`haunted-mcp`)
 - **Purpose:** MCP server exposing macOS Calendar.app to Claude (and any other MCP client) via AppleScript.
 - **Scope:** single-package, single-binary CLI. Fifteen tools. Stdio transport only.
 - **Platform:** macOS only (`package.json` declares `"os": ["darwin"]`).
 - **Runtime:** Node 22.14+.
 - **Package manager:** pnpm 10.33.0 (see `packageManager` field).
-- **Repo:** <https://github.com/yongzhe-wang/apple-calendar-mcp>
+- **Repo:** <https://github.com/yongzhe-wang/haunted-mcp>
 
 ## File layout
 

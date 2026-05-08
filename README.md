@@ -1,6 +1,6 @@
 <p align="center"><img src="docs/assets/logo.svg" width="240"></p>
-<h1 align="center">HECKLE</h1>
-<p align="center"><i>Your calendar, with a peanut gallery.</i></p>
+<h1 align="center">HAUNTED</h1>
+<p align="center"><i>A calendar haunted by people who know you.</i></p>
 
 <p align="center">
   <a href="LICENSE"><img src="https://img.shields.io/badge/license-MIT-blue.svg"></a>
@@ -9,11 +9,11 @@
   <img src="https://img.shields.io/badge/macOS-only-lightgrey.svg">
 </p>
 
-![Hero — calendar with character + memory](docs/screenshots/character-memory-week.png)
+![Hero — calendar haunted by people who know you](docs/screenshots/character-memory-week.png)
 
-> HECKLE is an MCP server that lets the people who know you comment on every event in your Apple Calendar. Mom, your friend, your future self, your therapist, your bartender — they all leave one-line notes referencing your past calendar history. macOS-only, local-only, fully reversible.
+> HAUNTED is an MCP server that lets the people who know you comment on every event in your Apple Calendar. Mom, your friend, your future self, your therapist, your bartender — they all leave one-line notes referencing your past calendar history. macOS-only, local-only, fully reversible.
 
-[GitHub](https://github.com/yongzhe-wang/apple-calendar-mcp) · [Docs](docs/) · [Changelog](CHANGELOG.md) · [Security](SECURITY.md) · [Contributing](CONTRIBUTING.md)
+[GitHub](https://github.com/yongzhe-wang/haunted-mcp) · [Docs](docs/) · [Changelog](CHANGELOG.md) · [Security](SECURITY.md) · [Contributing](CONTRIBUTING.md)
 
 ## Quickstart
 
@@ -24,9 +24,9 @@
 ```json
 {
   "mcpServers": {
-    "heckle": {
+    "haunted": {
       "command": "npx",
-      "args": ["-y", "heckle-mcp"]
+      "args": ["-y", "haunted-mcp"]
     }
   }
 }
@@ -36,11 +36,11 @@
 3. Restart Claude.
 4. Ask: _"What's on my calendar this week?"_
 
-(Replace the `heckle` key with whatever name you want to call it in chat.)
+(Replace the `haunted` key with whatever name you want to call it in chat.)
 
-## Customizing what HECKLE says
+## Customizing what HAUNTED says
 
-The character system is the heart of HECKLE — and it's designed to be customized. Three layers, in increasing order of effort:
+The character system is the heart of HAUNTED — and it's designed to be customized. Three layers, in increasing order of effort:
 
 1. **Pick from 12 built-in characters** (Mom, Friend, Coach, Therapist, Past-you, Future-you, Werner, Aurelius, Barkeep, Old friend, 夫子, Dog) — no setup required.
 2. **Define inline custom characters per call** — pass `custom_characters: [...]` to `enrich_with_character_reminders` for a one-off render.
@@ -48,7 +48,7 @@ The character system is the heart of HECKLE — and it's designed to be customiz
 
 Each character has a `directive` — a short system prompt for that voice. Tell Claude _exactly_ who that person is to you, what they care about, what they would notice. The directive is the lever for tuning what gets said. See [Define your own characters](#define-your-own-characters) below for the full schema.
 
-## What HECKLE does
+## What HAUNTED does
 
 - **15 tools** across 4 categories (CRUD, Analytics, Personas, Character Memory)
 - **12 built-in relational characters** — bring your own with `~/.apple-calendar-mcp/characters.json`
@@ -163,7 +163,7 @@ Field reference: `name` (unique, ≤64 chars), `short_label` (≤16 chars, embed
 - **Custom characters:** `~/.apple-calendar-mcp/characters.json` (mode `0600`)
 - **Snapshots:** `~/.apple-calendar-mcp/last_apply_backup_*.json`
 
-The data directory path is **kept** at `~/.apple-calendar-mcp/` even after the rename to HECKLE in v0.2.0, so existing v0.1.x users don't lose memory.
+The data directory path is **kept** at `~/.apple-calendar-mcp/` across renames (HECKLE in v0.2.0, HAUNTED in v0.2.1), so existing users don't lose memory or custom characters.
 
 [See docs/permissions.md for macOS TCC setup.](docs/permissions.md)
 
@@ -182,8 +182,8 @@ Local-only. Threat surface: AppleScript injection (mitigated by escape disciplin
 ## Development
 
 ```bash
-git clone https://github.com/yongzhe-wang/apple-calendar-mcp.git
-cd apple-calendar-mcp
+git clone https://github.com/yongzhe-wang/haunted-mcp.git
+cd haunted-mcp
 pnpm install
 pnpm test
 pnpm build
@@ -200,9 +200,9 @@ pnpm check
 
 ## Status & roadmap
 
-v0.2.0 — current. Renamed from `apple-calendar-mcp`. 15 tools, 265 tests, all gates green on macos-latest.
+v0.2.1 — current. Renamed from `apple-calendar-mcp` → `heckle-mcp` → `haunted-mcp`. 15 tools, 265 tests, all gates green on macos-latest.
 
-Formerly published as `apple-calendar-mcp`. The package was renamed in v0.2.0; the old name is no longer maintained.
+Formerly published as `apple-calendar-mcp` and `heckle-mcp`. The package was renamed to `haunted-mcp` in v0.2.1; older names are no longer maintained.
 
 ## Contributing
 
@@ -214,4 +214,4 @@ MIT © Yongzhe Wang 2026
 
 ---
 
-_Heckle was built in one day during a hackathon, then iterated for two more. The character memory system was the moment it stopped being a calendar and became something stranger._
+_Haunted was built in one day during a hackathon, then iterated for two more. The character memory system was the moment it stopped being a calendar and became something stranger — every event narrated by a voice from your past._

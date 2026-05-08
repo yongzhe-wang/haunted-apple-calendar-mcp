@@ -115,80 +115,83 @@
         box-sizing: border-box;
       }
       /* color variants */
+      .c-startup {
+        background: #ef6c00;
+      }
       .c-courses {
         background: #c2185b;
-      }
-      .c-appts {
-        background: #388e3c;
       }
       .c-work {
         background: #c62828;
       }
-      .c-life {
-        background: #00838f;
+      .c-appts {
+        background: #388e3c;
       }
     </style>
   </head>
   <body>
     <div class="frame">
       <div class="header">
-        <b>HAUNTED</b> &nbsp; — every event has a one-line note from someone who knows you
+        <b>HAUNTED</b> &nbsp; — every event narrated by someone who knows the situation
       </div>
 
       <div class="row">
-        <!-- Card 1 — Mom / Courses -->
+        <!-- Card 1 — Marc Andreessen / Startup -->
+        <div class="card">
+          <div class="stripe c-startup"></div>
+          <div class="cal-tag">Startup</div>
+          <div class="title">WIRED: Coffee, founders &amp; funders</div>
+          <div class="sep"></div>
+          <div class="voice">
+            <span class="who">— Marc Andreessen:</span> BUILD. The funders showed up 04-29 at
+            "Before the Pitch"; the founders who closed were already shipping. Be obvious.
+          </div>
+          <div class="time"><span class="dot"></span> 8 – 9 AM &nbsp;·&nbsp; Wed May 6</div>
+        </div>
+
+        <!-- Card 2 — Charlie Munger / Courses -->
         <div class="card">
           <div class="stripe c-courses"></div>
           <div class="cal-tag">Courses</div>
-          <div class="title">CIS/BAN 3200 — Homework 7 (Due)</div>
+          <div class="title">CIS 3200 - Final Exam</div>
           <div class="sep"></div>
           <div class="voice">
-            <span class="who">— Mom:</span> 你 04-22 才搞过 “CIS 3200 - Homework
-            6”，妈妈担心你又熬夜。
+            <span class="who">— Charlie Munger:</span> Invert. Don't ask if you'll pass. Ask what
+            Midterm 2 04-21 should have taught you. I have nothing to add.
           </div>
-          <div class="time"><span class="dot"></span> 8 – 9 AM &nbsp;·&nbsp; Wed Apr 29</div>
+          <div class="time"><span class="dot"></span> 12 – 2 PM &nbsp;·&nbsp; Wed May 6</div>
         </div>
 
-        <!-- Card 2 — Friend / Appointments -->
-        <div class="card">
-          <div class="stripe c-appts"></div>
-          <div class="cal-tag">Appointments</div>
-          <div class="title">Lunch with leo &amp; Eleanor</div>
-          <div class="sep"></div>
-          <div class="voice">
-            <span class="who">— Friend:</span> bro 上次 “Lunch with Ilia Popov” 05-03 才搞过 — round
-            5 already?
-          </div>
-          <div class="time"><span class="dot"></span> 12 – 1 PM &nbsp;·&nbsp; Tue Apr 28</div>
-        </div>
-
-        <!-- Card 3 — Future-you / Work/Job -->
+        <!-- Card 3 — Andrej Karpathy / Work/Job -->
         <div class="card">
           <div class="stripe c-work"></div>
           <div class="cal-tag">Work / Job</div>
-          <div class="title">CS 580 — TA Weekly Meeting</div>
+          <div class="title">CS 580 - TA weekly meeting</div>
           <div class="sep"></div>
           <div class="voice">
-            <span class="who">— Future-you:</span> From 60: this hour is finite. Was it worth it?
+            <span class="who">— Andrej Karpathy:</span> 14th forward pass since spring. Each cohort
+            updates on different gradients. The bitter lesson is the rubric, not the model. lol.
           </div>
           <div class="time"><span class="dot"></span> 6 – 7 PM &nbsp;·&nbsp; Tue Apr 28</div>
         </div>
 
-        <!-- Card 4 — Therapist / life -->
+        <!-- Card 4 — Joan Didion / Appointments -->
         <div class="card">
-          <div class="stripe c-life"></div>
-          <div class="cal-tag">life</div>
-          <div class="title">Reply to Prof. Michael Hicks — pick meeting time</div>
+          <div class="stripe c-appts"></div>
+          <div class="cal-tag">Appointments</div>
+          <div class="title">Lunch with Ilia Popov</div>
           <div class="sep"></div>
           <div class="voice">
-            <span class="who">— Therapist:</span> I notice “meeting with CIS prof…” — what feeling
-            came up just now?
+            <span class="who">— Joan Didion:</span> The third lunch since "Lunch with leo &amp;
+            Eleanor" 04-28. Friends, then. We do not comment on the recurrence.
           </div>
-          <div class="time"><span class="dot"></span> 9 – 10 AM &nbsp;·&nbsp; Mon Apr 27</div>
+          <div class="time"><span class="dot"></span> 11 AM – 12 PM &nbsp;·&nbsp; Sun May 3</div>
         </div>
       </div>
 
-      <div class="footer">github.com/yongzhe-wang/haunted-mcp</div>
+      <div class="footer">
+        github.com/yongzhe-wang/haunted-mcp &nbsp;·&nbsp; 12 distillers &nbsp;·&nbsp; 12 characters
+      </div>
     </div>
   </body>
 </html>

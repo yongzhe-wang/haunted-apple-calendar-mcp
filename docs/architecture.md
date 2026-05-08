@@ -60,6 +60,54 @@ v1 memory files load unchanged. Missing maps default to empty.
 
 The diagram is the whole story. There is no daemon, no web server, no native module, no database. The only subprocess HAUNTED ever spawns is `osascript`.
 
+## Case study: heyday
+
+A worked example of Stages 1–8 against an ambiguous, information-sparse input. The user's calendar contained a single `heyday` event (Thu Apr 30, 10:30 AM – 5:45 PM, Courses calendar). Memory had no prior matches; the title alone is a generic English noun. The 9-stage pipeline turns the seven-hour block into a domain-grounded calendar entry without any code changes — the work is all in routing context.
+
+```
+Stage 1  extract_entities_from_input
+  → input: "user calendar has event 'heyday' at 10:30 AM Thu Apr 30, 7h block"
+  → output: { events: [{ title: "heyday", ... }],
+              topics: ["heyday"],
+              people: [] }
+
+Stage 2  research_entities
+  → input:  { entities: [{ name: "heyday", kind: "topic" }] }
+  → output: { cached_facts: {},                    // none yet
+              needs_research: ["heyday"] }
+  Claude (orchestrator) runs WebSearch("heyday upenn")
+    → finds Penn Hey Day (junior-to-senior moving-up day, since 1916)
+  Claude calls cache_research_facts:
+    { entity:     "heyday upenn",
+      kind:       "topic",
+      summary:    "Penn Hey Day: junior-to-senior moving-up day since 1916,
+                   red T-shirts, straw hats, canes, 3-question pass-fail
+                   exam delivered by the Penn President.",
+      sources:    ["archives.upenn.edu/...", "penntoday.upenn.edu/..."],
+      confidence: 0.92,
+      ttl_days:   7 }
+
+Stage 3  update_memory_from_input
+  → adds memory.topics["Hey Day"] with external_summary
+  → adds memory.user_notes "user is a Penn junior 2026"
+
+Stage 6  query_full_context_for_event(event_inline = heyday)
+  → memory_context_items: []                       // no prior heyday events
+  → topic_context:        [{ name: "Hey Day", external_summary: "..." }]
+  → people_context:       []
+  → user_notes_relevant:  ["user is a Penn junior 2026"]
+
+Stage 7  composition (Claude only — REWRITE_INSTRUCTIONS_V2)
+  → 夫子 voice + Hey Day domain context
+  → "三年学问, 一日礼成. 红衫戴冠, 君子志学之毕也. 1916 至今同此礼."
+
+Stage 8  apply_character_reminders
+  → mutates Calendar.app event's summary + notes (with sentinel backup block)
+  → iCloud sync to iPhone
+```
+
+Without Stage 2, Stage 7 has no facts to ground the line and falls back to a placeholder ("子曰: heyday 初见于此, 君子慎其始, 不在数, 在精专."). With Stage 2, every clause in the composed sentence — three years, the red tunic, the cap, the 1916 date — is traceable to a cached external fact. The voice is identical. The information density is not. Voice is the wrapper; facts come from memory + web. The pipeline's job is to route facts into Stage 7.
+
 ## Three invariants
 
 These don't bend.

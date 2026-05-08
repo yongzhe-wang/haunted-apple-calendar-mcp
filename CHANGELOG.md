@@ -29,6 +29,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 - Data directory `~/.apple-calendar-mcp/` keeps existing structure. New top-level fields are additive.
 
+### Case studies
+
+- **heyday**: real-world stress test of Stages 2-3. The user's calendar had a single 7-hour `heyday` event. Memory had 0 prior matches. Without web research, voice (夫子) fell back to a placeholder ("初见于此"). With Stage 2 web research, the system surfaced Penn's Hey Day tradition (since 1916, junior→senior moving-up day with red shirts / straw hats / canes / 3-question presidential exam). The same voice (夫子) then composed a grounded sentence: "三年学问, 一日礼成. 红衫戴冠, 君子志学之毕也. 1916 至今同此礼." — every claim traceable to the external fact, none invented.
+
 ## [0.4.0] - 2026-05-08
 
 ### Renamed

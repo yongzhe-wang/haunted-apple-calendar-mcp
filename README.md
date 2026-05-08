@@ -98,6 +98,47 @@ HAUNTED v0.5 reframes memory as a **user model** that grows from every input —
 
 Memory schema v2 keys: `events`, `people`, `topics`, `user_notes`, `external_facts`. v1 files load unchanged. See [docs/architecture.md](docs/architecture.md) for the full diagram.
 
+### Case study: heyday
+
+A real stress test of Stages 2–3, run on a single ambiguous calendar entry.
+
+**Input.** The user has one event titled `heyday` (Thu Apr 30, 10:30 AM – 5:45 PM, Courses calendar). Memory has 0 prior `heyday` entries — the word looks like a generic English noun ("the heyday of jazz"). The seven-hour block is the only signal that something specific is happening.
+
+**Without web research (old behavior).** The voice (夫子) has nothing to anchor on, so it falls back to a placeholder:
+
+```
+heyday — 夫子: 子曰: heyday 初见于此, 君子慎其始, 不在数, 在精专.
+```
+
+A generic Confucian platitude. No information. The user could write that themselves.
+
+**With web research (new pipeline, Stages 2–3).** Stage 1 extracts `heyday` as a topic. Stage 2 returns `cached_facts: {}` and `needs_research: ["heyday"]`. Claude (the orchestrator) runs `WebSearch("heyday upenn")` and surfaces the actual referent: **Hey Day** at the University of Pennsylvania — the junior-to-senior moving-up tradition since 1916, marked by red T-shirts, straw hats, canes, and a three-question pass-fail "exam" delivered by the Penn President. Claude calls `cache_research_facts` to persist that summary (7-day TTL).
+
+**Memory update (Stage 3).** `memory.topics["Hey Day"]` now carries an `external_summary` describing the tradition. On every future event whose title overlaps, that summary is in scope.
+
+**Voice composition (Stage 7).** Same 夫子 voice, now grounded:
+
+```
+heyday — 夫子: 子曰: 三年学问, 一日礼成. 红衫戴冠, 君子志学之毕也. 1916 至今同此礼.
+```
+
+Translation: _"Confucius said: three years of study, one day of ceremony complete. Red tunic, capped — the gentleman marks the end of his studentship. Same rite since 1916."_
+
+Same character. Different information density. Every claim — three years, the red tunic, the cap, the 1916 date — traces back to the cached external fact. Nothing invented.
+
+**Takeaway.** _Voice is the wrapper; the facts come from your past calendar (memory) and from web research. Without facts, voice has nothing to say._
+
+## Why HAUNTED knows things
+
+A character only sounds knowing when there is something to know. HAUNTED draws on four layered sources of context, all merged at Stage 6 (`query_full_context_for_event`) and handed to the LLM at Stage 7 for composition:
+
+1. **Memory — your past calendar history.** Events you've actually had, who showed up, which topics recur. Seeded by `seed_calendar_memory` from up to five years back.
+2. **External facts — web-researched domain knowledge.** What is heyday? Who is Lingjie Liu? What is CS 580? Cached in `external_facts` with a 7-day TTL, refreshed on demand.
+3. **People records.** Named humans across all inputs — bios, roles, relationships — accumulated as you give Claude screenshots and messages.
+4. **User notes — things you've told Claude in chat.** Verbatim user statements with a source label, persisted so they outlast a single session.
+
+All four feed the Stage 6 context build. Stage 7 composition reads from that bundle and composes one grounded sentence per event, in the assigned voice. If the bundle is empty, the LLM is instructed to say less, not invent more.
+
 ## Tools — 22 MCP server tools for macOS Calendar
 
 ### CRUD

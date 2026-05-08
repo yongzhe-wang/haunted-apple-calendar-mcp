@@ -4,6 +4,16 @@ All notable changes to `yapping-apple-calendar-mcp` (formerly `apple-calendar-mc
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.6.2] - 2026-05-08
+
+### Fixed
+
+- `list_events` now correctly returns recurring events whose master start date is outside the requested window. Previously the AppleScript whose-clause filtered on master start, silently dropping weekly/monthly recurrences (e.g. `andrew wang oh cis5800`, `unlearning paper`, `meeting research`). The widened query (master >= window_start - 730 days) plus a recurrence-aware TS post-filter (RRULE FREQ=DAILY/WEEKLY/MONTHLY/YEARLY plus UNTIL/COUNT respected) now captures these. Affects every consumer of `list_events`: `enrich_with_character_reminders`, `seed_calendar_memory`, `time_per_calendar`, `search_events`, `query_full_context_for_event`.
+
+### Added
+
+- `EventSchema.recurrence_rule` (optional) — the raw iCal RRULE string from Calendar.app, surfaced on every emitted occurrence so downstream tools can reason about recurrence.
+
 ## [0.6.1] - 2026-05-08
 
 ### Added

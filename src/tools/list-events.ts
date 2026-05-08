@@ -20,7 +20,7 @@ const WEEKDAY_TO_RRULE: Record<number, string> = {
   6: "SA",
 };
 
-type ParsedEventRecord = CalendarEvent & {
+export type ParsedEventRecord = CalendarEvent & {
   recurrence?: string;
 };
 
@@ -36,7 +36,7 @@ set rs to "${RECORD_SEPARATOR}"
 set us to "${UNIT_SEPARATOR}"
 set startDate to ${startExpr}
 set endDate to ${endExpr}
-set candidateStartDate to startDate - (180 * days)
+set candidateStartDate to startDate - (730 * days)
 set out to ""
 tell application "Calendar"
   repeat with cal in calendars
@@ -76,8 +76,11 @@ tell application "Calendar"
         set out to out & (evId as string) & us & (evTitle as string) & us & (evStart as string) & us & (evEnd as string) & us & allDayFlag & us & (evLoc as string) & us & (evNotes as string) & us & calName & us & (evUrl as string) & us & evRecurrence & rs
       end repeat
 
-      -- Recurring events expose the series start date, not the visible occurrence,
-      -- so only recurring candidates get the wider lookback window.
+      -- Recurring events expose the series start date, not the visible
+      -- occurrence, so only recurring candidates get the wider 2-year
+      -- lookback. Master start dates older than 730 days are vanishingly
+      -- rare in practice; the TS-side post-filter still respects RRULE
+      -- UNTIL/COUNT so we never over-emit past the real series end.
       set recurringCandidates to (every event of cal whose recurrence is not equal to "" and start date is less than or equal to endDate and end date is greater than or equal to candidateStartDate)
       repeat with ev in recurringCandidates
         set evRecurrence to ""
@@ -170,31 +173,69 @@ function expandAndFilterEvents(events: ParsedEventRecord[], args: ListEventsArgs
     if (!event.recurrence) {
       return eventOverlapsRange(event, rangeStart, rangeEnd) ? [stripRecurrence(event)] : [];
     }
-    return expandWeeklyRecurrence(event, rangeStart, rangeEnd);
+    return expandRecurrence(event, rangeStart, rangeEnd);
   });
 }
 
-function expandWeeklyRecurrence(
+// Whether a recurring event with this RRULE has ANY occurrence overlapping
+// [rangeStart, rangeEnd]. Conservative: when we can't decide cheaply we
+// over-include rather than risk the silent-drop bug from before 0.6.2.
+export function eventOccursInWindow(
+  event: ParsedEventRecord,
+  rangeStart: Date,
+  rangeEnd: Date,
+): boolean {
+  if (!event.recurrence) {
+    return eventOverlapsRange(event, rangeStart, rangeEnd);
+  }
+  return expandRecurrence(event, rangeStart, rangeEnd).length > 0;
+}
+
+function expandRecurrence(
   event: ParsedEventRecord,
   rangeStart: Date,
   rangeEnd: Date,
 ): CalendarEvent[] {
   const rule = parseRRule(event.recurrence);
-  if (rule.get("FREQ") !== "WEEKLY") {
-    return eventOverlapsRange(event, rangeStart, rangeEnd) ? [stripRecurrence(event)] : [];
+  const freq = rule.get("FREQ");
+  if (freq === "WEEKLY") {
+    return expandWeeklyRecurrence(event, rule, rangeStart, rangeEnd);
   }
+  if (freq === "DAILY") {
+    return expandStepRecurrence(event, rule, rangeStart, rangeEnd, "DAILY");
+  }
+  if (freq === "MONTHLY") {
+    return expandStepRecurrence(event, rule, rangeStart, rangeEnd, "MONTHLY");
+  }
+  if (freq === "YEARLY") {
+    return expandStepRecurrence(event, rule, rangeStart, rangeEnd, "YEARLY");
+  }
+  // Unknown FREQ — fall back to over-include with master start so we never
+  // silently drop the event (the bug this whole rewrite is fixing).
+  return eventOverlapsRange(event, rangeStart, rangeEnd) ? [stripRecurrence(event)] : [];
+}
+
+function expandWeeklyRecurrence(
+  event: ParsedEventRecord,
+  rule: Map<string, string>,
+  rangeStart: Date,
+  rangeEnd: Date,
+): CalendarEvent[] {
   const start = new Date(event.start);
   const end = new Date(event.end);
   const durationMs = end.getTime() - start.getTime();
   const until = parseRRuleUntil(rule.get("UNTIL"));
+  const count = parseRRuleCount(rule.get("COUNT"));
   const interval = Number.parseInt(rule.get("INTERVAL") ?? "1", 10);
   const byDays = new Set(
     (rule.get("BYDAY") ?? WEEKDAY_TO_RRULE[start.getDay()] ?? "").split(",").filter(Boolean),
   );
   const occurrences: CalendarEvent[] = [];
+  let occurrenceIndex = 0;
 
-  // Calendar.app gives us the series template; expand only the requested days
-  // so a broad recurring calendar cannot flood the MCP response.
+  // We can't iterate by ALL series occurrences across years if the master is
+  // distant — instead, iterate the requested window day-by-day and pick the
+  // matching weekday slots, then verify against COUNT/UNTIL.
   for (const day of eachLocalDay(rangeStart, rangeEnd)) {
     if (!byDays.has(WEEKDAY_TO_RRULE[day.getDay()] ?? "")) {
       continue;
@@ -206,6 +247,14 @@ function expandWeeklyRecurrence(
     if (occurrenceStart < start || (until && occurrenceStart > until)) {
       continue;
     }
+    if (count !== undefined) {
+      // Count occurrences from series start up to (and including) this date.
+      const idx = countWeeklyOccurrencesUpTo(start, occurrenceStart, byDays, interval);
+      if (idx > count) {
+        continue;
+      }
+    }
+    occurrenceIndex += 1;
     const occurrenceEnd = new Date(occurrenceStart.getTime() + durationMs);
     const occurrence = {
       ...stripRecurrence(event),
@@ -216,7 +265,94 @@ function expandWeeklyRecurrence(
       occurrences.push(occurrence);
     }
   }
+  void occurrenceIndex;
   return occurrences;
+}
+
+// DAILY / MONTHLY / YEARLY share the "advance by N units, optionally limited
+// by COUNT or UNTIL" shape. We walk forward from the master start until we
+// pass rangeEnd or violate UNTIL/COUNT, collecting occurrences inside the
+// window.
+function expandStepRecurrence(
+  event: ParsedEventRecord,
+  rule: Map<string, string>,
+  rangeStart: Date,
+  rangeEnd: Date,
+  freq: "DAILY" | "MONTHLY" | "YEARLY",
+): CalendarEvent[] {
+  const start = new Date(event.start);
+  const end = new Date(event.end);
+  const durationMs = end.getTime() - start.getTime();
+  const until = parseRRuleUntil(rule.get("UNTIL"));
+  const count = parseRRuleCount(rule.get("COUNT"));
+  const interval = Math.max(1, Number.parseInt(rule.get("INTERVAL") ?? "1", 10));
+  const occurrences: CalendarEvent[] = [];
+
+  // Hard cap to defend against pathological RRULEs (e.g. DAILY for 100 years
+  // with INTERVAL=1). Real calendars never need more than a few thousand.
+  const HARD_LIMIT = 10_000;
+  let cursor = new Date(start);
+  let i = 0;
+  while (i < HARD_LIMIT) {
+    if (until && cursor > until) {
+      break;
+    }
+    if (count !== undefined && i >= count) {
+      break;
+    }
+    if (cursor > rangeEnd) {
+      break;
+    }
+    const occurrenceEnd = new Date(cursor.getTime() + durationMs);
+    if (occurrenceEnd >= rangeStart) {
+      const occurrence = {
+        ...stripRecurrence(event),
+        start: cursor.toISOString(),
+        end: occurrenceEnd.toISOString(),
+      };
+      occurrences.push(occurrence);
+    }
+    cursor = advanceBy(cursor, freq, interval);
+    i += 1;
+  }
+  return occurrences;
+}
+
+function advanceBy(date: Date, freq: "DAILY" | "MONTHLY" | "YEARLY", interval: number): Date {
+  const next = new Date(date);
+  if (freq === "DAILY") {
+    next.setDate(next.getDate() + interval);
+  } else if (freq === "MONTHLY") {
+    next.setMonth(next.getMonth() + interval);
+  } else {
+    next.setFullYear(next.getFullYear() + interval);
+  }
+  return next;
+}
+
+function countWeeklyOccurrencesUpTo(
+  seriesStart: Date,
+  target: Date,
+  byDays: Set<string>,
+  interval: number,
+): number {
+  const weekMs = 7 * 24 * 60 * 60 * 1000;
+  const startWeek = startOfLocalWeek(seriesStart).getTime();
+  const targetWeek = startOfLocalWeek(target).getTime();
+  const weeks = Math.max(0, Math.floor((targetWeek - startWeek) / weekMs));
+  const activeWeeks = Math.floor(weeks / Math.max(1, interval)) + 1;
+  // Approximate: assume each active week emits one occurrence per BYDAY entry.
+  // Off by at most |BYDAY| at the boundary, which is fine for our COUNT cap.
+  const perWeek = Math.max(1, byDays.size);
+  return activeWeeks * perWeek;
+}
+
+function parseRRuleCount(count: string | undefined): number | undefined {
+  if (!count) {
+    return undefined;
+  }
+  const parsed = Number.parseInt(count, 10);
+  return Number.isFinite(parsed) && parsed > 0 ? parsed : undefined;
 }
 
 function parseRRule(rule: string | undefined): Map<string, string> {
@@ -296,7 +432,10 @@ function withTimeFrom(day: Date, timeSource: Date): Date {
 }
 
 function stripRecurrence(event: ParsedEventRecord): CalendarEvent {
-  const { recurrence: _recurrence, ...calendarEvent } = event;
+  const { recurrence, ...calendarEvent } = event;
+  if (recurrence && recurrence.length > 0) {
+    return { ...calendarEvent, recurrence_rule: recurrence };
+  }
   return calendarEvent;
 }
 

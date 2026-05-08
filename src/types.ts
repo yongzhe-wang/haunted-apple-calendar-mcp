@@ -20,6 +20,11 @@ export const EventSchema = z.object({
   notes: z.string().optional(),
   calendar_name: z.string(),
   url: z.string().optional(),
+  // Raw iCal RRULE string from Calendar.app when the event is recurring;
+  // omitted for one-off events. Surfaces so downstream tools can reason
+  // about recurrence (e.g. mortality_overlay weighting future occurrences)
+  // and so the bug-fix (0.6.2) is observable to callers.
+  recurrence_rule: z.string().optional(),
 });
 
 export type CalendarInfo = z.infer<typeof CalendarInfoSchema>;

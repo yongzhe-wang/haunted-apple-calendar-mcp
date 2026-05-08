@@ -6,7 +6,7 @@ body:
     id: what
     attributes:
       label: The idea
-      placeholder: I want HAUNTED to be able to ...
+      placeholder: I want YAPPING to be able to ...
     validations:
       required: true
   - type: textarea

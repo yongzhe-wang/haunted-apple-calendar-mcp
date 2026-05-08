@@ -1,18 +1,18 @@
 # AGENTS.md
 
-**The brand:** Haunted — a calendar haunted by people who know you.
+**The brand:** Yapping — your calendar, but yapping.
 
 Telegraph style. Root rules only. This file is for AI coding agents opening this repo.
 
 ## Project
 
-- **Name:** HAUNTED (`haunted-apple-calendar-mcp`)
+- **Name:** YAPPING (`yapping-apple-calendar-mcp`)
 - **Purpose:** MCP server exposing macOS Calendar.app to Claude (and any other MCP client) via AppleScript.
-- **Scope:** single-package, single-binary CLI. 22 tools — 17 calendar/voice/memory tools plus 5 HAUNTED 9-stage pipeline tools (`extract_entities_from_input`, `research_entities`, `cache_research_facts`, `update_memory_from_input`, `query_full_context_for_event`). Stdio transport only.
+- **Scope:** single-package, single-binary CLI. 22 tools — 17 calendar/voice/memory tools plus 5 YAPPING 9-stage pipeline tools (`extract_entities_from_input`, `research_entities`, `cache_research_facts`, `update_memory_from_input`, `query_full_context_for_event`). Stdio transport only.
 - **Platform:** macOS only (`package.json` declares `"os": ["darwin"]`).
 - **Runtime:** Node 22.14+.
 - **Package manager:** pnpm 10.33.0 (see `packageManager` field).
-- **Repo:** <https://github.com/yongzhe-wang/haunted-apple-calendar-mcp>
+- **Repo:** <https://github.com/yongzhe-wang/yapping-apple-calendar-mcp>
 
 ## File layout
 

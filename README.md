@@ -1,44 +1,49 @@
-<p align="center"><img src="docs/assets/logo.svg" alt="HAUNTED Apple Calendar MCP server logo — a calendar haunted by people who know you" width="720"></p>
+<p align="center"><img src="docs/assets/logo.svg" alt="YAPPING Apple Calendar MCP server logo — your calendar, but yapping" width="720"></p>
 
-<h1 align="center">🎭 HAUNTED — Apple Calendar MCP for Claude</h1>
-<p align="center"><i>A calendar haunted by people who know you. The open-source Apple Calendar MCP server for Claude Desktop, Claude Code, and any MCP-compatible client.</i></p>
+# 🎭 YAPPING — Apple Calendar MCP for Claude
+
+> _your calendar, but yapping._
+
+<p align="center"><i>28 voices yap on every event you schedule. Your mom. Your future self. Garry Tan. LeBron James. Hilary Hahn. Alan Turing. Confucius. They all yap.</i></p>
 
 <p align="center">
   <a href="LICENSE"><img alt="MIT license" src="https://img.shields.io/badge/license-MIT-blue.svg"></a>
-  <img alt="265 tests passing" src="https://img.shields.io/badge/tests-265%20passing-green.svg">
+  <img alt="tests passing" src="https://img.shields.io/badge/tests-passing-green.svg">
   <a href="https://modelcontextprotocol.io"><img alt="MCP compatible — Model Context Protocol" src="https://img.shields.io/badge/MCP-compatible-purple.svg"></a>
   <img alt="macOS only" src="https://img.shields.io/badge/macOS-only-lightgrey.svg">
-  <a href="https://www.npmjs.com/package/haunted-apple-calendar-mcp"><img alt="npm version" src="https://img.shields.io/npm/v/haunted-apple-calendar-mcp.svg"></a>
+  <a href="https://www.npmjs.com/package/yapping-apple-calendar-mcp"><img alt="npm version" src="https://img.shields.io/npm/v/yapping-apple-calendar-mcp.svg"></a>
 </p>
 
 <p align="center">
-  💬 open Claude Code · 📩 paste your event · 🔌 MCP · 🎭 characters as skills · 📅 calendar item · ☁️ sync everywhere
+  💬 open Claude Code · 📩 paste your event · 🔌 MCP · 🎭 28 voices yap as skills · 📅 calendar item · ☁️ sync everywhere
 </p>
 
-![HAUNTED Apple Calendar MCP — sample event cards in different characters' voices, rendered by Claude](docs/screenshots/haunted-hero-cards.png)
+![YAPPING Apple Calendar MCP — sample event cards in different characters' voices, rendered by Claude](docs/screenshots/yapping-hero-cards.png)
 
-> **HAUNTED** is an open-source **Apple Calendar MCP server** for **Claude Desktop**, **Claude Code**, and any [Model Context Protocol](https://modelcontextprotocol.io) client. It gives Claude full read/write access to your **macOS Calendar.app** via [AppleScript](https://developer.apple.com/library/archive/documentation/AppleScript/Conceptual/AppleScriptLangGuide/) — plus 12 relational characters and 16 synthetic distillers (Mom, Future-you, Garry Tan, Alan Turing, LeBron James, Ian (Hearts2Hearts), …) that comment on every calendar event with one-line reminders grounded in your past calendar history. macOS-only, local-only, fully reversible.
+## What is YAPPING?
 
-[GitHub](https://github.com/yongzhe-wang/haunted-apple-calendar-mcp) · [npm](https://www.npmjs.com/package/haunted-apple-calendar-mcp) · [Docs](docs/) · [Changelog](CHANGELOG.md) · [Security](SECURITY.md) · [Contributing](CONTRIBUTING.md)
+YAPPING is an open-source Apple Calendar MCP server for Claude Desktop, Claude Code, and any MCP-compatible client. It gives Claude full read/write access to your macOS Calendar.app via AppleScript — plus 12 relational characters and 16 synthetic distillers (Mom, Future-you, Garry Tan, Alan Turing, LeBron James, Hilary Hahn, Confucius, ...) who YAP on every calendar event with one-line reminders that reference your past calendar history AND web-researched domain facts. macOS-only, local-only, fully reversible.
+
+[GitHub](https://github.com/yongzhe-wang/yapping-apple-calendar-mcp) · [npm](https://www.npmjs.com/package/yapping-apple-calendar-mcp) · [Docs](docs/) · [Changelog](CHANGELOG.md) · [Security](SECURITY.md) · [Contributing](CONTRIBUTING.md)
 
 ## Table of contents
 
-- [What is HAUNTED?](#what-is-haunted)
+- [What is YAPPING?](#what-is-yapping)
 - [How to install Apple Calendar MCP for Claude](#how-to-install-apple-calendar-mcp-for-claude)
-- [Customizing what HAUNTED says](#customizing-what-haunted-says)
+- [Customizing what YAPPING says](#customizing-what-yapping-says)
 - [Tools — 17 MCP server tools for macOS Calendar](#tools--17-mcp-server-tools-for-macos-calendar)
 - [Calendar Memory & Character Reminders](#calendar-memory--character-reminders)
 - [Define your own characters](#define-your-own-characters)
 - [Distillers — synthetic voices of named people](#distillers--synthetic-voices-of-named-people)
 - [Configuration](#configuration)
-- [How HAUNTED works (architecture)](#how-haunted-works-architecture)
+- [How YAPPING works (architecture)](#how-yapping-works-architecture)
 - [Security](#security)
 - [Development](#development)
 - [FAQ — Apple Calendar + MCP + Claude integration](#faq--apple-calendar--mcp--claude-integration)
 
-## What is HAUNTED?
+## What is YAPPING?
 
-HAUNTED is an **Apple Calendar MCP server**: a small Node.js binary that speaks the [Model Context Protocol](https://modelcontextprotocol.io) over stdio and exposes your **macOS Calendar.app** to Claude. It is open-source, local-only, has no network calls, and ships 17 MCP tools across CRUD, analytics, personas, character memory, and distillers. If you want Claude to actually read and write the calendar on your Mac — and to do it with personality — this is the MCP server for that.
+YAPPING is an **Apple Calendar MCP server**: a small Node.js binary that speaks the [Model Context Protocol](https://modelcontextprotocol.io) over stdio and exposes your **macOS Calendar.app** to Claude. It is open-source, local-only, has no network calls, and ships 17 MCP tools across CRUD, analytics, personas, character memory, and distillers. If you want Claude to actually read and write the calendar on your Mac — and to do it with personality — this is the MCP server for that.
 
 ## How to install Apple Calendar MCP for Claude
 
@@ -49,9 +54,9 @@ HAUNTED is an **Apple Calendar MCP server**: a small Node.js binary that speaks 
 ```json
 {
   "mcpServers": {
-    "haunted": {
+    "yapping": {
       "command": "npx",
-      "args": ["-y", "haunted-apple-calendar-mcp"]
+      "args": ["-y", "yapping-apple-calendar-mcp"]
     }
   }
 }
@@ -61,11 +66,11 @@ HAUNTED is an **Apple Calendar MCP server**: a small Node.js binary that speaks 
 3. Restart Claude.
 4. Ask: _"What's on my calendar this week?"_
 
-(Replace the `haunted` key with whatever name you want to call the MCP server in chat.)
+(Replace the `yapping` key with whatever name you want to call the MCP server in chat.)
 
-## Customizing what HAUNTED says
+## Customizing what YAPPING says
 
-The character system is the heart of HAUNTED — and it's designed to be customized. Three layers, in increasing order of effort:
+The character system is the heart of YAPPING — and it's designed to be customized. Three layers, in increasing order of effort:
 
 1. **Pick from 12 built-in characters** (Mom, Friend, Coach, Therapist, Past-you, Future-you, Werner, Aurelius, Barkeep, Old friend, 夫子, Dog) — no setup required.
 2. **Define inline custom characters per call** — pass `custom_characters: [...]` to `enrich_with_character_reminders` for a one-off render.
@@ -73,7 +78,7 @@ The character system is the heart of HAUNTED — and it's designed to be customi
 
 Each character has a `directive` — a short system prompt for that voice. Tell Claude _exactly_ who that person is to you, what they care about, what they would notice. The directive is the lever for tuning what gets said. See [Define your own characters](#define-your-own-characters) below for the full schema.
 
-## What HAUNTED does
+## What YAPPING does
 
 - **17 MCP tools** across 5 categories (CRUD, Analytics, Personas, Character Memory, Distillers)
 - **12 built-in relational characters** — bring your own with `~/.apple-calendar-mcp/characters.json`
@@ -83,9 +88,9 @@ Each character has a `directive` — a short system prompt for that voice. Tell 
 
 [See docs/examples.md for 8 real prompt → result walk-throughs.](docs/examples.md)
 
-## The 9-stage HAUNTED pipeline
+## The 9-stage YAPPING pipeline
 
-HAUNTED v0.5 reframes memory as a **user model** that grows from every input — screenshots, messages, URLs, free text — not just past calendar events. The MCP server provides 5 new tools that orchestrate a single 9-stage flow:
+YAPPING v0.5 reframes memory as a **user model** that grows from every input — screenshots, messages, URLs, free text — not just past calendar events. The MCP server provides 5 new tools that orchestrate a single 9-stage flow:
 
 ```
 0. INPUT (screenshot / message / URL / free text)
@@ -132,9 +137,9 @@ Same character. Different information density. Every claim — three years, the 
 
 **Takeaway.** _Voice is the wrapper; the facts come from your past calendar (memory) and from web research. Without facts, voice has nothing to say._
 
-## Why HAUNTED knows things
+## Why YAPPING knows things
 
-A character only sounds knowing when there is something to know. HAUNTED draws on four layered sources of context, all merged at Stage 6 (`query_full_context_for_event`) and handed to the LLM at Stage 7 for composition:
+A character only sounds knowing when there is something to know. YAPPING draws on four layered sources of context, all merged at Stage 6 (`query_full_context_for_event`) and handed to the LLM at Stage 7 for composition:
 
 1. **Memory — your past calendar history.** Events you've actually had, who showed up, which topics recur. Seeded by `seed_calendar_memory` from up to five years back.
 2. **External facts — web-researched domain knowledge.** What is heyday? Who is Lingjie Liu? What is CS 580? Cached in `external_facts` with a 7-day TTL, refreshed on demand.
@@ -286,11 +291,11 @@ Every Distiller carries an `attribution` field, every directive ends with "Synth
 - **Custom distillers:** `~/.apple-calendar-mcp/distillers.json` (mode `0600`)
 - **Snapshots:** `~/.apple-calendar-mcp/last_apply_backup_*.json`
 
-The data directory path is **kept** at `~/.apple-calendar-mcp/` across renames (HECKLE in v0.2.0, HAUNTED in v0.2.1, `haunted-apple-calendar-mcp` in v0.4.0), so existing users don't lose memory or custom characters.
+The data directory path is **kept** at `~/.apple-calendar-mcp/` across renames (HECKLE in v0.2.0, YAPPING in v0.2.1, `yapping-apple-calendar-mcp` in v0.4.0), so existing users don't lose memory or custom characters.
 
 [See docs/permissions.md for macOS TCC setup.](docs/permissions.md)
 
-## How HAUNTED works (architecture)
+## How YAPPING works (architecture)
 
 stdio transport, AppleScript-only, no network, no native bindings. Three-phase tool pattern: pure script-builder + pure parser + async wrapper. Calendar.app `uid` is the event identifier. RS/US separators for parse output. Escape discipline locked into `escapeAppleScriptString`.
 
@@ -305,8 +310,8 @@ Local-only. No network. Threat surface: AppleScript injection (mitigated by esca
 ## Development
 
 ```bash
-git clone https://github.com/yongzhe-wang/haunted-apple-calendar-mcp.git
-cd haunted-apple-calendar-mcp
+git clone https://github.com/yongzhe-wang/yapping-apple-calendar-mcp.git
+cd yapping-apple-calendar-mcp
 pnpm install
 pnpm test
 pnpm build
@@ -325,41 +330,41 @@ pnpm check
 
 ### How do I connect Apple Calendar to Claude?
 
-Install this Apple Calendar MCP server with `npx -y haunted-apple-calendar-mcp`, register it in your `claude_desktop_config.json` under `mcpServers`, then grant Claude **Calendar Automation** in macOS System Settings → Privacy & Security → Automation. Restart Claude. Ask "what's on my calendar this week?" and Claude will use the MCP tools to read your macOS Calendar.app directly.
+Install this Apple Calendar MCP server with `npx -y yapping-apple-calendar-mcp`, register it in your `claude_desktop_config.json` under `mcpServers`, then grant Claude **Calendar Automation** in macOS System Settings → Privacy & Security → Automation. Restart Claude. Ask "what's on my calendar this week?" and Claude will use the MCP tools to read your macOS Calendar.app directly.
 
 ### What is an MCP server?
 
-An MCP server is a small program that speaks the [Model Context Protocol](https://modelcontextprotocol.io) — Anthropic's open standard for letting LLMs call tools. HAUNTED is an MCP server for Apple Calendar: it exposes 17 calendar tools (list, search, create, update, delete, plus character/memory/distiller tools) so Claude can read and write your macOS Calendar.app.
+An MCP server is a small program that speaks the [Model Context Protocol](https://modelcontextprotocol.io) — Anthropic's open standard for letting LLMs call tools. YAPPING is an MCP server for Apple Calendar: it exposes 17 calendar tools (list, search, create, update, delete, plus character/memory/distiller tools) so Claude can read and write your macOS Calendar.app.
 
 ### Does this work with Claude Desktop AND Claude Code?
 
-Yes. Both Claude Desktop and Claude Code load MCP servers from `claude_desktop_config.json`. The same config block works for both. Any other MCP-compatible client (Cline, Continue, Zed, custom agents) can also use HAUNTED — it's a plain stdio MCP server.
+Yes. Both Claude Desktop and Claude Code load MCP servers from `claude_desktop_config.json`. The same config block works for both. Any other MCP-compatible client (Cline, Continue, Zed, custom agents) can also use YAPPING — it's a plain stdio MCP server.
 
 ### Can I add my own characters or voices?
 
-Yes — that's the point. Drop a JSON file at `~/.apple-calendar-mcp/characters.json` (or `distillers.json`) and HAUNTED merges your roster into every `enrich_with_character_reminders` call alongside the 12 built-in characters and 16 built-in distillers. You can also pass `custom_characters: [...]` inline per tool call. See [Define your own characters](#define-your-own-characters).
+Yes — that's the point. Drop a JSON file at `~/.apple-calendar-mcp/characters.json` (or `distillers.json`) and YAPPING merges your roster into every `enrich_with_character_reminders` call alongside the 12 built-in characters and 16 built-in distillers. You can also pass `custom_characters: [...]` inline per tool call. See [Define your own characters](#define-your-own-characters).
 
-### Is HAUNTED safe? Does it call any external API?
+### Is YAPPING safe? Does it call any external API?
 
-No external API. No network. HAUNTED only spawns `osascript` (the macOS AppleScript runtime) and reads/writes files in `~/.apple-calendar-mcp/` (mode `0600`). All event data stays on your Mac. The threat surface — AppleScript injection, stdio corruption, Calendar.app TCC scope — is documented in [SECURITY.md](SECURITY.md).
+No external API. No network. YAPPING only spawns `osascript` (the macOS AppleScript runtime) and reads/writes files in `~/.apple-calendar-mcp/` (mode `0600`). All event data stays on your Mac. The threat surface — AppleScript injection, stdio corruption, Calendar.app TCC scope — is documented in [SECURITY.md](SECURITY.md).
 
 ### How do I revert if I don't like the changes Claude made to my calendar?
 
-Every `apply_character_reminders` call writes a sentinel-marked backup of the original title/notes/location into the event's notes field, _and_ a JSON snapshot to `~/.apple-calendar-mcp/last_apply_backup_<unix_ts>.json`. Call `revert_character_reminders` with the same date window and HAUNTED restores the originals from the embedded backup block. Fully reversible.
+Every `apply_character_reminders` call writes a sentinel-marked backup of the original title/notes/location into the event's notes field, _and_ a JSON snapshot to `~/.apple-calendar-mcp/last_apply_backup_<unix_ts>.json`. Call `revert_character_reminders` with the same date window and YAPPING restores the originals from the embedded backup block. Fully reversible.
 
-### Why does HAUNTED require macOS?
+### Why does YAPPING require macOS?
 
 Because it talks to **Apple Calendar.app** through **AppleScript** (`osascript`). AppleScript is a macOS-only IPC mechanism. There is no equivalent path on Linux or Windows, so the package declares `"os": ["darwin"]` in `package.json`.
 
 ### Does it work with Google Calendar, Outlook, or other calendars?
 
-Indirectly — if you've added your Google Calendar, Outlook, or iCloud account inside macOS Calendar.app, HAUNTED reads and writes through Calendar.app, so events in those accounts are visible. HAUNTED itself does not call Google/Microsoft APIs and has no concept of those services beyond the Calendar.app account name.
+Indirectly — if you've added your Google Calendar, Outlook, or iCloud account inside macOS Calendar.app, YAPPING reads and writes through Calendar.app, so events in those accounts are visible. YAPPING itself does not call Google/Microsoft APIs and has no concept of those services beyond the Calendar.app account name.
 
 ## Status & roadmap
 
-v0.4.0 — current. Renamed for SEO from `apple-calendar-mcp` → `heckle-mcp` → `haunted-mcp` → `haunted-apple-calendar-mcp`. 17 tools, 265 tests, all gates green on macos-latest.
+v0.4.0 — current. Renamed for SEO from `apple-calendar-mcp` → `heckle-mcp` → `yapping-mcp` → `yapping-apple-calendar-mcp`. 17 tools, 265 tests, all gates green on macos-latest.
 
-Formerly published as `apple-calendar-mcp`, `heckle-mcp`, and `haunted-mcp`. The package is now `haunted-apple-calendar-mcp` as of v0.4.0; older names are no longer maintained but the data directory `~/.apple-calendar-mcp/` is preserved.
+Formerly published as `apple-calendar-mcp`, `heckle-mcp`, and `yapping-mcp`. The package is now `yapping-apple-calendar-mcp` as of v0.4.0; older names are no longer maintained but the data directory `~/.apple-calendar-mcp/` is preserved.
 
 ## Contributing
 
@@ -371,6 +376,6 @@ MIT © Yongzhe Wang 2026
 
 ---
 
-_HAUNTED — the Apple Calendar MCP server for Claude — was built in one day during a hackathon, then iterated for two more. The character memory system was the moment it stopped being a calendar and became something stranger — every event narrated by a voice from your past._
+_YAPPING — the Apple Calendar MCP server for Claude — was built in one day during a hackathon, then iterated for two more. The character memory system was the moment it stopped being a calendar and became something stranger — every event narrated by a voice from your past._
 
-[⬆ back to top](#-haunted--apple-calendar-mcp-for-claude)
+[⬆ back to top](#-yapping--apple-calendar-mcp-for-claude)

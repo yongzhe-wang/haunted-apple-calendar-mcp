@@ -339,7 +339,7 @@ export async function listEvents(args: ListEventsArgs): Promise<CalendarEvent[]>
         const detail =
           result.reason instanceof Error ? result.reason.message : String(result.reason);
         process.stderr.write(
-          `[haunted-mcp] list_events: calendar "${name}" failed: ${detail.slice(0, 500)}\n`,
+          `[yapping-mcp] list_events: calendar "${name}" failed: ${detail.slice(0, 500)}\n`,
         );
       }
     });

@@ -1,5 +1,5 @@
 blank_issues_enabled: false
 contact_links:
   - name: Security vulnerability
-    url: https://github.com/yongzhe-wang/haunted-apple-calendar-mcp/security/advisories/new
+    url: https://github.com/yongzhe-wang/yapping-apple-calendar-mcp/security/advisories/new
     about: "Do not file security issues here. Use GitHub Security Advisories."

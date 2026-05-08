@@ -1,6 +1,6 @@
 import { z } from "zod";
 
-// Stage 1 of the HAUNTED 9-stage pipeline.
+// Stage 1 of the YAPPING 9-stage pipeline.
 //
 // This tool does NOT itself parse anything. It returns a tight extraction
 // schema + instructions that tell the calling LLM (Claude) exactly how to

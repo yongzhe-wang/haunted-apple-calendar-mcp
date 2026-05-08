@@ -66,7 +66,7 @@ function ok(data: unknown): { content: ToolContent[] } {
 
 function fail(err: unknown): { content: ToolContent[]; isError: true } {
   // Stderr only — stdout is the MCP transport channel.
-  process.stderr.write(`[haunted-mcp] ${String(err)}\n`);
+  process.stderr.write(`[yapping-mcp] ${String(err)}\n`);
   return {
     content: [{ type: "text", text: formatUserFacingError(err) }],
     isError: true,
@@ -76,7 +76,7 @@ function fail(err: unknown): { content: ToolContent[]; isError: true } {
 async function main(): Promise<void> {
   const server = new McpServer(
     {
-      name: "haunted-apple-calendar-mcp",
+      name: "yapping-apple-calendar-mcp",
       version: "0.5.0",
     },
     {
@@ -402,7 +402,7 @@ async function main(): Promise<void> {
     {
       title: "Extract entities from input",
       description:
-        "Stage 1 of HAUNTED pipeline. Returns a structured extraction schema instructing Claude to parse a screenshot/message into events, people, topics, statements, intent.",
+        "Stage 1 of YAPPING pipeline. Returns a structured extraction schema instructing Claude to parse a screenshot/message into events, people, topics, statements, intent.",
       inputSchema: ExtractEntitiesFromInputInput.shape,
     },
     async (args) => {
@@ -489,10 +489,10 @@ async function main(): Promise<void> {
 
   const transport = new StdioServerTransport();
   await server.connect(transport);
-  process.stderr.write("[haunted-mcp] ready on stdio\n");
+  process.stderr.write("[yapping-mcp] ready on stdio\n");
 }
 
 main().catch((err) => {
-  process.stderr.write(`[haunted-mcp] fatal: ${String(err)}\n`);
+  process.stderr.write(`[yapping-mcp] fatal: ${String(err)}\n`);
   process.exit(1);
 });

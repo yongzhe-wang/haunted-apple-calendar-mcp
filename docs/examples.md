@@ -1,6 +1,6 @@
 # Examples
 
-Eight things to ask Claude once HAUNTED is wired up. Each prompt shows the tool calls Claude is likely to make and what you'll see come back.
+Eight things to ask Claude once YAPPING is wired up. Each prompt shows the tool calls Claude is likely to make and what you'll see come back.
 
 ## 1. "What's on my calendar this week?"
 

@@ -1,7 +1,7 @@
 {
-  "name": "haunted-apple-calendar-mcp",
-  "version": "0.5.2",
-  "description": "Apple Calendar MCP server for Claude — HAUNTED gives Claude Desktop and Claude Code full read/write access to your macOS Calendar.app, with 12 relational characters and 16 synthetic distiller voices that comment on every event using your past calendar memory.",
+  "name": "yapping-apple-calendar-mcp",
+  "version": "0.6.0",
+  "description": "Yapping: an MCP server that makes your macOS Apple Calendar yap in 28 voices (Mom, Future-you, Garry Tan, LeBron James, Hilary Hahn, Alan Turing, Confucius, ...) on every event using your past calendar memory + web research. For Claude Desktop, Claude Code, any MCP client.",
   "keywords": [
     "apple-calendar",
     "apple-calendar-mcp",
@@ -13,7 +13,6 @@
     "claude-code",
     "claude-desktop",
     "distillers",
-    "haunted",
     "macos",
     "macos-calendar",
     "mcp",
@@ -21,21 +20,23 @@
     "memento-mori",
     "memory",
     "model-context-protocol",
-    "personas"
+    "personas",
+    "yapping"
   ],
-  "homepage": "https://github.com/yongzhe-wang/haunted-apple-calendar-mcp#readme",
+  "homepage": "https://github.com/yongzhe-wang/yapping-apple-calendar-mcp#readme",
   "bugs": {
-    "url": "https://github.com/yongzhe-wang/haunted-apple-calendar-mcp/issues"
+    "url": "https://github.com/yongzhe-wang/yapping-apple-calendar-mcp/issues"
   },
   "license": "MIT",
   "author": "Yongzhe Wang",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/yongzhe-wang/haunted-apple-calendar-mcp.git"
+    "url": "git+https://github.com/yongzhe-wang/yapping-apple-calendar-mcp.git"
   },
   "bin": {
     "haunted": "dist/index.js",
-    "haunted-apple-calendar-mcp": "dist/index.js"
+    "yapping": "dist/index.js",
+    "yapping-apple-calendar-mcp": "dist/index.js"
   },
   "files": [
     "CHANGELOG.md",

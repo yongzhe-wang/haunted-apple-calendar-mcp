@@ -1,6 +1,6 @@
-# Contributing to HAUNTED
+# Contributing to YAPPING
 
-Thanks for your interest. HAUNTED is small enough that drive-by contributions are welcome.
+Thanks for your interest. YAPPING is small enough that drive-by contributions are welcome.
 
 ## Quick checks before opening a PR
 

@@ -1,4 +1,4 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 400" width="1200" height="400" role="img" aria-label="HAUNTED — Apple Calendar MCP for Claude. A calendar haunted by people who know you.">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 400" width="1200" height="400" role="img" aria-label="YAPPING — Apple Calendar MCP for Claude. Your calendar, but yapping.">
   <defs>
     <linearGradient id="g" x1="0" y1="0" x2="1" y2="1">
       <stop offset="0%" stop-color="#1f1f1f"/>
@@ -7,8 +7,8 @@
   </defs>
   <rect width="1200" height="400" fill="url(#g)" rx="32"/>
   <g font-family="-apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Helvetica Neue', Arial, sans-serif" text-anchor="middle">
-    <text x="600" y="200" font-size="180" font-weight="900" fill="#ffd23f" letter-spacing="14">HAUNTED</text>
-    <text x="600" y="260" font-size="28" font-style="italic" fill="#f5f5f5" letter-spacing="1.5">A calendar haunted by people who know you.</text>
+    <text x="600" y="200" font-size="180" font-weight="900" fill="#ffd23f" letter-spacing="14">YAPPING</text>
+    <text x="600" y="260" font-size="28" font-style="italic" fill="#f5f5f5" letter-spacing="1.5">your calendar, but yapping.</text>
     <text x="600" y="320" font-size="18" font-weight="600" fill="#9ca3af" letter-spacing="6">APPLE CALENDAR · MCP · FOR CLAUDE · MACOS</text>
   </g>
 </svg>

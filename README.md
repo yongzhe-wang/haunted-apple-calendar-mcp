@@ -79,7 +79,26 @@ Each character has a `directive` — a short system prompt for that voice. Tell 
 
 [See docs/examples.md for 8 real prompt → result walk-throughs.](docs/examples.md)
 
-## Tools — 17 MCP server tools for macOS Calendar
+## The 9-stage HAUNTED pipeline
+
+HAUNTED v0.5 reframes memory as a **user model** that grows from every input — screenshots, messages, URLs, free text — not just past calendar events. The MCP server provides 5 new tools that orchestrate a single 9-stage flow:
+
+```
+0. INPUT (screenshot / message / URL / free text)
+1. EXTRACT          → extract_entities_from_input
+2. RESEARCH         → research_entities → (Claude WebSearch/WebFetch) → cache_research_facts
+3. MEMORY UPDATE    → update_memory_from_input
+4. CALENDAR ACTION  → create_event / update_event / delete_event
+5. CHARACTER SELECT → enrich_with_character_reminders (existing logic)
+6. CONTEXT BUILD    → query_full_context_for_event
+7. COMPOSE          → Claude voices the per-event sentence (anti-fabrication enforced)
+8. APPLY            → apply_character_reminders
+9. FEEDBACK LOOP    → mutated event back to memory
+```
+
+Memory schema v2 keys: `events`, `people`, `topics`, `user_notes`, `external_facts`. v1 files load unchanged. See [docs/architecture.md](docs/architecture.md) for the full diagram.
+
+## Tools — 22 MCP server tools for macOS Calendar
 
 ### CRUD
 
@@ -112,6 +131,14 @@ Each character has a `directive` — a short system prompt for that voice. Tell 
 
 - `list_distillers` — enumerate synthetic voices distilled from public material of named people (Garry Tan, PG, Naval, Karpathy, Steve Jobs, Bezos, Munger, Alan Turing, LeBron James, Hilary Hahn, …)
 - `distill_voice_from_text` — supply a corpus, get a draft Distiller object back for the LLM to fill in
+
+### 9-stage pipeline (v0.5)
+
+- `extract_entities_from_input` — Stage 1: structured extraction schema (events / people / topics / user statements / intent)
+- `research_entities` — Stage 2: cached external_facts + research directive for Claude to act on with WebSearch/WebFetch
+- `cache_research_facts` — Stage 2 follow-up: persist Claude's web findings (7-day TTL)
+- `update_memory_from_input` — Stage 3: bulk-merge extraction results into memory v2
+- `query_full_context_for_event` — Stage 6: full context bundle (memory + people + topics + external facts + user notes) for one event
 
 [Full reference: docs/tools.md](docs/tools.md)
 

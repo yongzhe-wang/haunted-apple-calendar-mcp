@@ -6,6 +6,7 @@ import { BUILT_IN_CHARACTERS } from "../src/characters.js";
 import { emptyMemory, type MemoryFile } from "../src/memory.js";
 import {
   REWRITE_INSTRUCTIONS,
+  REWRITE_INSTRUCTIONS_V2,
   assignCharacters,
   buildEnrichmentResult,
 } from "../src/tools/enrich-with-character-reminders.js";
@@ -111,9 +112,9 @@ describe("buildEnrichmentResult", () => {
     use_persistent_config: true,
   };
 
-  it("returns the documented rewrite_template verbatim", () => {
+  it("returns the documented rewrite_template (v2) verbatim", () => {
     const out = buildEnrichmentResult({ args: baseArgs, events: [], memory: emptyMemory() });
-    expect(out.rewrite_template).toBe(REWRITE_INSTRUCTIONS);
+    expect(out.rewrite_template).toBe(REWRITE_INSTRUCTIONS_V2);
   });
 
   it("REWRITE_INSTRUCTIONS hardens against fabrication", () => {
@@ -121,9 +122,31 @@ describe("buildEnrichmentResult", () => {
     expect(REWRITE_INSTRUCTIONS).toContain("first time on calendar");
   });
 
+  it("REWRITE_INSTRUCTIONS_V2 references the new context categories", () => {
+    expect(REWRITE_INSTRUCTIONS_V2).toContain("people_context");
+    expect(REWRITE_INSTRUCTIONS_V2).toContain("topic_context");
+    expect(REWRITE_INSTRUCTIONS_V2).toContain("external_facts");
+    expect(REWRITE_INSTRUCTIONS_V2).toContain("user_notes_relevant");
+    expect(REWRITE_INSTRUCTIONS_V2).toContain("NEVER fabricate");
+  });
+
+  it("each enriched event has the v2 context bundle keys", () => {
+    const out = buildEnrichmentResult({
+      args: baseArgs,
+      events: [mkEvent("1", "lunch")],
+      memory: emptyMemory(),
+    });
+    const ev = out.events[0];
+    expect(ev).toBeDefined();
+    expect(ev?.people_context).toEqual([]);
+    expect(ev?.topic_context).toEqual([]);
+    expect(ev?.external_facts).toEqual([]);
+    expect(ev?.user_notes_relevant).toEqual([]);
+  });
+
   it("attaches memory_context when include_memory_context=true", () => {
     const memory: MemoryFile = {
-      version: 1,
+      version: 2,
       last_updated: "2026-04-01T00:00:00Z",
       events: [
         {
@@ -196,7 +219,7 @@ describe("buildEnrichmentResult", () => {
     writeFileSync(
       p,
       JSON.stringify({
-        version: 1,
+        version: 2,
         characters: [{ name: "ShouldNotAppear", short_label: "X", directive: "memory ref" }],
       }),
       "utf8",

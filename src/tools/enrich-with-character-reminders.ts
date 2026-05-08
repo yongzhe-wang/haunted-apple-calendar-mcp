@@ -14,9 +14,8 @@ import {
 } from "../distillers.js";
 import {
   DEFAULT_MEMORY_PATH,
+  getRelevantContextForEvent,
   loadMemory,
-  recentSimilarEvents,
-  type MemoryEvent,
   type MemoryFile,
 } from "../memory.js";
 import type {
@@ -40,8 +39,18 @@ export const REWRITE_INSTRUCTIONS =
   "5. Keep total title length ≤ 100 chars.\n" +
   "6. NEVER fabricate. The voice is the wrapper; the memory references must be true. Without truth, the joke has no punch.";
 
+export const REWRITE_INSTRUCTIONS_V2 =
+  "For each event:\n" +
+  "1. Read character_directive + memory_context_items + people_context + topic_context + external_facts + user_notes_relevant.\n" +
+  "2. Reference at least one CONCRETE item across these categories by literal title/date/name. Do NOT invent counts/dates/names not present in the supplied context.\n" +
+  "3. If ALL context categories are empty: say 'first time on calendar' / 'no precedent' / '初见于此' honestly.\n" +
+  "4. Use external_facts to give actual domain advice in voice (e.g. if voice is Karpathy and fact says event is a CG course, the advice should reference scaling laws / forward pass / etc. — voice + domain).\n" +
+  '5. Output: "{original_title} — {character_label}: {your_sentence}"\n' +
+  "6. Total ≤ 100 chars.\n" +
+  "7. NEVER fabricate. The voice is the wrapper; every claim must trace to context.";
+
 const PER_EVENT_REWRITE_INSTRUCTION =
-  "Compose ONE sentence in this character's voice. If memory_context is non-empty, reference at least one item by its literal title or date — do NOT invent counts or dates not in memory_context. If memory_context is empty, say 'first time on calendar' (or '初见于此') honestly. Output as `{original_title} — {character_label}: {sentence}`, ≤100 chars total. Never fabricate.";
+  "Compose ONE sentence in this character's voice. Reference at least one literal item from memory_context / people_context / topic_context / external_facts / user_notes_relevant. If ALL are empty, say 'first time on calendar' (or '初见于此') honestly. Output as `{original_title} — {character_label}: {sentence}`, ≤100 chars total. Never fabricate.";
 
 /**
  * Resolve the final character pool used for assignment.
@@ -220,14 +229,31 @@ export function buildEnrichmentResult(
     }
     usedNames.add(character.name);
 
-    let memoryContext: MemoryEvent[] = [];
-    if (args.include_memory_context && args.memory_context_size > 0) {
-      memoryContext = recentSimilarEvents(
-        memory,
-        { title: evt.title, calendar: evt.calendar_name, start: evt.start },
-        args.memory_context_size,
-      );
-    }
+    const wantContext = args.include_memory_context && args.memory_context_size > 0;
+    const ctx = wantContext
+      ? getRelevantContextForEvent(
+          memory,
+          {
+            title: evt.title,
+            calendar: evt.calendar_name,
+            start: evt.start,
+            ...(evt.notes !== undefined ? { notes: evt.notes } : {}),
+          },
+          {
+            top_n_memory: args.memory_context_size,
+            top_n_people: 5,
+            top_n_topics: 3,
+            top_n_user_notes: 5,
+            include_user_notes: true,
+          },
+        )
+      : {
+          memory_context_items: [],
+          people_context: [],
+          topic_context: [],
+          external_facts: [],
+          user_notes_relevant: [],
+        };
 
     const out: EnrichedCharacterEvent = {
       id: evt.id,
@@ -238,7 +264,11 @@ export function buildEnrichmentResult(
       calendar_name: evt.calendar_name,
       character_label: character.short_label,
       character_directive: character.directive,
-      memory_context: memoryContext,
+      memory_context: ctx.memory_context_items,
+      people_context: ctx.people_context,
+      topic_context: ctx.topic_context,
+      external_facts: ctx.external_facts,
+      user_notes_relevant: ctx.user_notes_relevant,
       rewrite_instruction: PER_EVENT_REWRITE_INSTRUCTION,
     };
     if (evt.location !== undefined) {
@@ -260,7 +290,7 @@ export function buildEnrichmentResult(
   return {
     events: outEvents,
     characters_used: Array.from(usedNames),
-    rewrite_template: REWRITE_INSTRUCTIONS,
+    rewrite_template: REWRITE_INSTRUCTIONS_V2,
   };
 }
 

@@ -4,6 +4,31 @@ All notable changes to `haunted-apple-calendar-mcp` (formerly `apple-calendar-mc
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.5.0] - 2026-05-08
+
+### Added — 9-stage HAUNTED pipeline
+
+- Memory schema bumped to **v2**. Top-level adds `people`, `topics`, `user_notes`, `external_facts` alongside the existing `events` array. v1 files load unchanged; missing maps default to empty.
+- 5 new MCP tools, one per pipeline stage that needed server-side help:
+  - `extract_entities_from_input` (Stage 1) — returns the extraction schema + instructions Claude follows to parse a screenshot/message into structured events / people / topics / user statements / intent.
+  - `research_entities` (Stage 2) — returns cached non-stale `external_facts` plus a research directive listing entities Claude still has to look up via WebSearch/WebFetch at its layer.
+  - `cache_research_facts` (Stage 2 follow-up) — persists Claude's web-research findings into `~/.apple-calendar-mcp/memory.json`'s `external_facts` map (7-day TTL by default).
+  - `update_memory_from_input` (Stage 3) — bulk-merges extraction results into events / people / topics / user_notes maps in a single atomic save.
+  - `query_full_context_for_event` (Stage 6) — returns the full context bundle (memory_context_items + people_context + topic_context + external_facts + user_notes_relevant) for one event so Claude can compose substantive voice commentary.
+- New helpers in `src/memory.ts`: `mergePeople`, `mergeTopics`, `mergeUserNotes`, `mergeExternalFacts`, `getRelevantContextForEvent`, `isFactStale`.
+- `enrich_with_character_reminders` now attaches the full v2 context bundle (people / topics / facts / user notes) per event, not just the 3-similar-events memory_context. Returns `REWRITE_INSTRUCTIONS_V2` as `rewrite_template`.
+- `REWRITE_INSTRUCTIONS_V2` (exported) — anti-fabrication template that names every context category and tells the LLM to surface domain-specific advice from `external_facts`.
+
+### Changed
+
+- Tool count: 17 -> 22.
+- `MemoryFile.version` literal type widened to `1 | 2`. Saves always emit `2`.
+- `enrich_with_character_reminders` output schema: each event now carries `people_context`, `topic_context`, `external_facts`, `user_notes_relevant` arrays.
+
+### Note
+
+- Data directory `~/.apple-calendar-mcp/` keeps existing structure. New top-level fields are additive.
+
 ## [0.4.0] - 2026-05-08
 
 ### Renamed

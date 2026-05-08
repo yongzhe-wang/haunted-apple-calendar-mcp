@@ -24,10 +24,39 @@ HAUNTED (`haunted-mcp`) is a single-process Node 22 binary that speaks the [Mode
 
 State on disk:
   ~/.apple-calendar-mcp/
-    memory.json                    # seeded calendar history
+    memory.json                    # v2: events + people + topics + user_notes + external_facts
     characters.json                # user-defined characters (optional)
     last_apply_backup_*.json       # per-batch revert snapshots
 ```
+
+## The 9-stage HAUNTED pipeline (v0.5)
+
+Memory is a **user model** that grows from every input — Gmail screenshots, free text, URLs — not just past calendar events. Web research happens BEFORE character composition so the LLM has external facts (course descriptions, professor bios, etc.) to draw from when voicing per-event reminders.
+
+```
+0. INPUT             (Claude receives a screenshot / message / URL / free text)
+1. EXTRACT           extract_entities_from_input
+2. RESEARCH          research_entities → (Claude WebSearch/WebFetch) → cache_research_facts
+3. MEMORY UPDATE     update_memory_from_input
+4. CALENDAR ACTION   create_event / update_event / delete_event
+5. CHARACTER SELECT  enrich_with_character_reminders
+6. CONTEXT BUILD     query_full_context_for_event
+7. COMPOSE           (Claude only — REWRITE_INSTRUCTIONS_V2, anti-fabrication)
+8. APPLY             apply_character_reminders
+9. FEEDBACK LOOP     mutated event back into memory on next seed/extract
+```
+
+Schema v2 (`src/memory.ts`):
+
+| Field            | Shape                                    | Purpose                                     |
+| ---------------- | ---------------------------------------- | ------------------------------------------- |
+| `events`         | `MemoryEvent[]`                          | Calendar history (existing).                |
+| `people`         | `Record<lowercase_name, PersonRecord>`   | Named humans across all inputs.             |
+| `topics`         | `Record<lowercase_name, TopicRecord>`    | Courses / event types / domains / clubs.    |
+| `user_notes`     | `UserNote[]`                             | Verbatim user statements with source label. |
+| `external_facts` | `Record<lowercase_entity, ExternalFact>` | 7-day-TTL web-research summaries.           |
+
+v1 memory files load unchanged. Missing maps default to empty.
 
 The diagram is the whole story. There is no daemon, no web server, no native module, no database. The only subprocess HAUNTED ever spawns is `osascript`.
 

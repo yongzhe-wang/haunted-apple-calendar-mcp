@@ -2,10 +2,15 @@ import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { StdioServerTransport } from "@modelcontextprotocol/sdk/server/stdio.js";
 import { formatUserFacingError } from "./errors.js";
 import { applyCharacterReminders } from "./tools/apply-character-reminders.js";
+import { CacheResearchFactsInput, cacheResearchFacts } from "./tools/cache-research-facts.js";
 import { createEvent } from "./tools/create-event.js";
 import { deleteEvent } from "./tools/delete-event.js";
 import { distillVoiceFromText } from "./tools/distill-voice-from-text.js";
 import { enrichWithCharacterReminders } from "./tools/enrich-with-character-reminders.js";
+import {
+  ExtractEntitiesFromInputInput,
+  extractEntitiesFromInput,
+} from "./tools/extract-entities-from-input.js";
 import { listCalendars } from "./tools/list-calendars.js";
 import { listDistillers } from "./tools/list-distillers.js";
 import { listEventsInMixedPersonas } from "./tools/list-events-in-mixed-personas.js";
@@ -13,11 +18,21 @@ import { listEventsInPersona } from "./tools/list-events-in-persona.js";
 import { listEvents } from "./tools/list-events.js";
 import { mortalityOverlay } from "./tools/mortality-overlay.js";
 import { runMemoryQuery } from "./tools/query-calendar-memory.js";
+import {
+  QueryFullContextForEventInput,
+  QueryFullContextForEventInputObject,
+  queryFullContextForEvent,
+} from "./tools/query-full-context-for-event.js";
+import { ResearchEntitiesInput, researchEntities } from "./tools/research-entities.js";
 import { revertCharacterReminders } from "./tools/revert-character-reminders.js";
 import { searchEvents } from "./tools/search-events.js";
 import { seedCalendarMemory } from "./tools/seed-calendar-memory.js";
 import { timePerCalendar } from "./tools/time-per-calendar.js";
 import { updateEvent } from "./tools/update-event.js";
+import {
+  UpdateMemoryFromInputInput,
+  updateMemoryFromInput,
+} from "./tools/update-memory-from-input.js";
 import {
   ApplyCharacterRemindersInput,
   CreateEventInput,
@@ -62,7 +77,7 @@ async function main(): Promise<void> {
   const server = new McpServer(
     {
       name: "haunted-apple-calendar-mcp",
-      version: "0.4.0",
+      version: "0.5.0",
     },
     {
       capabilities: { tools: {} },
@@ -376,6 +391,96 @@ async function main(): Promise<void> {
       try {
         const parsed = DeleteEventInput.parse(args);
         return ok(await deleteEvent(parsed));
+      } catch (err) {
+        return fail(err);
+      }
+    },
+  );
+
+  server.registerTool(
+    "extract_entities_from_input",
+    {
+      title: "Extract entities from input",
+      description:
+        "Stage 1 of HAUNTED pipeline. Returns a structured extraction schema instructing Claude to parse a screenshot/message into events, people, topics, statements, intent.",
+      inputSchema: ExtractEntitiesFromInputInput.shape,
+    },
+    async (args) => {
+      try {
+        const parsed = ExtractEntitiesFromInputInput.parse(args);
+        return ok(await extractEntitiesFromInput(parsed));
+      } catch (err) {
+        return fail(err);
+      }
+    },
+  );
+
+  server.registerTool(
+    "research_entities",
+    {
+      title: "Research entities",
+      description:
+        "Stage 2. Returns cached external_facts plus a research directive for entities not yet known. Claude does web search at its layer and calls cache_research_facts.",
+      inputSchema: ResearchEntitiesInput.shape,
+    },
+    async (args) => {
+      try {
+        const parsed = ResearchEntitiesInput.parse(args);
+        return ok(await researchEntities(parsed));
+      } catch (err) {
+        return fail(err);
+      }
+    },
+  );
+
+  server.registerTool(
+    "cache_research_facts",
+    {
+      title: "Cache research facts",
+      description:
+        "Stage 2 follow-up. Persists Claude's web-research findings into ~/.apple-calendar-mcp/memory.json's external_facts map (7-day TTL).",
+      inputSchema: CacheResearchFactsInput.shape,
+    },
+    async (args) => {
+      try {
+        const parsed = CacheResearchFactsInput.parse(args);
+        return ok(await cacheResearchFacts(parsed));
+      } catch (err) {
+        return fail(err);
+      }
+    },
+  );
+
+  server.registerTool(
+    "update_memory_from_input",
+    {
+      title: "Update memory from input",
+      description:
+        "Stage 3. Bulk-merges extraction results + research into memory's events / people / topics / user_notes maps.",
+      inputSchema: UpdateMemoryFromInputInput.shape,
+    },
+    async (args) => {
+      try {
+        const parsed = UpdateMemoryFromInputInput.parse(args);
+        return ok(await updateMemoryFromInput(parsed));
+      } catch (err) {
+        return fail(err);
+      }
+    },
+  );
+
+  server.registerTool(
+    "query_full_context_for_event",
+    {
+      title: "Query full context for event",
+      description:
+        "Stage 6. Returns the full context bundle (memory + people + topics + external facts + user notes) for one event so Claude can compose substantive voice commentary.",
+      inputSchema: QueryFullContextForEventInputObject.shape,
+    },
+    async (args) => {
+      try {
+        const parsed = QueryFullContextForEventInput.parse(args);
+        return ok(await queryFullContextForEvent(parsed));
       } catch (err) {
         return fail(err);
       }

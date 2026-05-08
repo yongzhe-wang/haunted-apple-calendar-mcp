@@ -10,7 +10,7 @@ let workdir = "";
 let memoryPath = "";
 
 const FIXTURE: MemoryFile = {
-  version: 1,
+  version: 2,
   last_updated: "2026-04-01T00:00:00Z",
   events: [
     {

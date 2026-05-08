@@ -322,6 +322,47 @@ const MemoryEventSchema = z.object({
   observations: z.array(z.string()).optional(),
 });
 
+// v2 memory schema records — surfaced through enrichment so Claude can
+// reference real people / topics / facts / user notes when composing voice.
+const PersonRecordSchema = z.object({
+  name: z.string(),
+  role: z.string().optional(),
+  relationship: z.string().optional(),
+  email: z.string().optional(),
+  first_seen: z.string(),
+  last_seen: z.string(),
+  appearances: z.array(z.string()),
+  external_summary: z.string().optional(),
+  notes: z.string().optional(),
+});
+
+const TopicRecordSchema = z.object({
+  name: z.string(),
+  kind: z.enum(["course", "event_type", "location", "domain", "club", "other"]).optional(),
+  first_seen: z.string(),
+  last_seen: z.string(),
+  appearance_count: z.number().int(),
+  external_summary: z.string().optional(),
+  notes: z.string().optional(),
+  related_people: z.array(z.string()).optional(),
+});
+
+const ExternalFactSchema = z.object({
+  entity: z.string(),
+  kind: z.enum(["person", "topic", "location", "domain"]),
+  summary: z.string(),
+  sources: z.array(z.string()),
+  confidence: z.number(),
+  cached_at: z.string(),
+  ttl_days: z.number(),
+});
+
+const UserNoteSchema = z.object({
+  text: z.string(),
+  source_input: z.string().optional(),
+  ts: z.string(),
+});
+
 export const QueryCalendarMemoryOutput = z.object({
   matches: z.array(MemoryEventSchema),
   total_in_memory: z.number().int(),
@@ -390,6 +431,12 @@ export const EnrichedCharacterEventSchema = EventSchema.extend({
   character_label: z.string(),
   character_directive: z.string(),
   memory_context: z.array(MemoryEventSchema),
+  // v2: full context bundle. Each is a sibling to `memory_context` so
+  // existing v1 callers that only read memory_context keep working.
+  people_context: z.array(PersonRecordSchema),
+  topic_context: z.array(TopicRecordSchema),
+  external_facts: z.array(ExternalFactSchema),
+  user_notes_relevant: z.array(UserNoteSchema),
   rewrite_instruction: z.string(),
   // Populated only when the assigned voice is a Distiller (vs. a Character).
   // `attribution` is the synthetic-voice disclaimer; `signature_phrases` are

@@ -8,7 +8,7 @@ Telegraph style. Root rules only. This file is for AI coding agents opening this
 
 - **Name:** HAUNTED (`haunted-apple-calendar-mcp`)
 - **Purpose:** MCP server exposing macOS Calendar.app to Claude (and any other MCP client) via AppleScript.
-- **Scope:** single-package, single-binary CLI. Seventeen tools. Stdio transport only.
+- **Scope:** single-package, single-binary CLI. 22 tools — 17 calendar/voice/memory tools plus 5 HAUNTED 9-stage pipeline tools (`extract_entities_from_input`, `research_entities`, `cache_research_facts`, `update_memory_from_input`, `query_full_context_for_event`). Stdio transport only.
 - **Platform:** macOS only (`package.json` declares `"os": ["darwin"]`).
 - **Runtime:** Node 22.14+.
 - **Package manager:** pnpm 10.33.0 (see `packageManager` field).
@@ -45,6 +45,11 @@ src/
     revert-character-reminders.ts       # restore originals from backup blocks across writable calendars
     list-distillers.ts                  # enumerate distillers with optional worldview/name filter
     distill-voice-from-text.ts          # orchestrator: returns draft Distiller + corpus + LLM instructions
+    extract-entities-from-input.ts      # Stage 1: extraction schema + instructions for Claude
+    research-entities.ts                # Stage 2: cached external_facts + research directive
+    cache-research-facts.ts             # Stage 2 follow-up: persist Claude's web findings
+    update-memory-from-input.ts         # Stage 3: bulk-merge events/people/topics/user_notes
+    query-full-context-for-event.ts     # Stage 6: full context bundle for one event
   util/
     concurrency.ts      # mapWithConcurrency, shared bounded fan-out helper
 test/

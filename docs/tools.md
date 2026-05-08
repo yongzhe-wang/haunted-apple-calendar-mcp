@@ -136,6 +136,28 @@ Find every event whose notes carry the backup sentinel and restore the original 
 - **Output shape:** `{ reverted: [{ event_id, restored_title }], scan_summary }`.
 - **Source:** `src/tools/revert-character-reminders.ts`.
 
+## Distillers
+
+### `list_distillers`
+
+Enumerate built-in distillers (synthetic voices distilled from public material of named people — Garry Tan, Paul Graham, Naval Ravikant, Sam Altman, Steve Jobs, Andrej Karpathy, Marc Andreessen, Jeff Bezos, Charlie Munger, Brian Chesky, Joan Didion, Old Founder), plus user-defined ones from `~/.apple-calendar-mcp/distillers.json`. Every output entry carries an `attribution` field stating the voice is synthetic and not endorsed by the named individual. Use this to pick which voice will narrate calendar events.
+
+- **Key inputs:** `worldview_filter?` (exact tag match, e.g. `"founder"`), `name_filter?` (substring), `use_persistent_config` (default `true`).
+- **Output shape:** `{ distillers: [{ name, short_label, attribution, signature_phrases, worldview_tags, representative_url?, triggers? }], total, source: "built-in" | "persistent" | "merged", notice }`.
+- **Source:** `src/tools/list-distillers.ts`.
+
+### `distill_voice_from_text`
+
+Take a corpus of someone's public writing/talks/tweets and return a draft `Distiller` object plus a set of generation instructions. The MCP server has no LLM, so the tool itself is a thin orchestrator: the calling LLM analyses `corpus_text`, fills in `directive` and `signature_phrases`, and (if the user confirms) writes the result to `~/.apple-calendar-mcp/distillers.json`. All distilled voices carry the synthetic-voice disclaimer.
+
+- **Key inputs:** `name`, `short_label`, `corpus_text` (20–50,000 chars), `worldview_tags?`, `triggers?`, `representative_url?`.
+- **Output shape:** `{ draft_distiller: { ...with PLACEHOLDER directive and empty signature_phrases }, corpus_text, generation_instructions }`.
+- **Source:** `src/tools/distill-voice-from-text.ts`.
+
+### Distillers in `enrich_with_character_reminders`
+
+`enrich_with_character_reminders` accepts `distiller_pool[]` and `custom_distillers[]` alongside `character_pool[]` and `custom_characters[]`. Distillers and characters merge into one assignment pool; conflicts resolve by name with inline > persistent > built-in. When the assigned voice is a distiller, the per-event output also includes `distiller_attribution` and `distiller_signature_phrases` so the calling LLM has the full voice fingerprint plus the synthetic-voice disclaimer in context.
+
 ## Conventions across all tools
 
 - **Errors** come back as `{ isError: true, content: [...] }` per the MCP spec, with user-facing messages routed through `formatUserFacingError`. Internal AppleScript errors are logged to stderr and never surface raw.

@@ -4,8 +4,10 @@ import { formatUserFacingError } from "./errors.js";
 import { applyCharacterReminders } from "./tools/apply-character-reminders.js";
 import { createEvent } from "./tools/create-event.js";
 import { deleteEvent } from "./tools/delete-event.js";
+import { distillVoiceFromText } from "./tools/distill-voice-from-text.js";
 import { enrichWithCharacterReminders } from "./tools/enrich-with-character-reminders.js";
 import { listCalendars } from "./tools/list-calendars.js";
+import { listDistillers } from "./tools/list-distillers.js";
 import { listEventsInMixedPersonas } from "./tools/list-events-in-mixed-personas.js";
 import { listEventsInPersona } from "./tools/list-events-in-persona.js";
 import { listEvents } from "./tools/list-events.js";
@@ -20,8 +22,10 @@ import {
   ApplyCharacterRemindersInput,
   CreateEventInput,
   DeleteEventInput,
+  DistillVoiceFromTextInput,
   EnrichWithCharacterRemindersInput,
   EnrichWithCharacterRemindersInputObject,
+  ListDistillersInput,
   ListEventsInMixedPersonasInput,
   ListEventsInMixedPersonasInputObject,
   ListEventsInPersonaInput,
@@ -58,7 +62,7 @@ async function main(): Promise<void> {
   const server = new McpServer(
     {
       name: "haunted-mcp",
-      version: "0.2.1",
+      version: "0.3.0",
     },
     {
       capabilities: { tools: {} },
@@ -319,6 +323,42 @@ async function main(): Promise<void> {
       try {
         const parsed = RevertCharacterRemindersInput.parse(args);
         return ok(await revertCharacterReminders(parsed));
+      } catch (err) {
+        return fail(err);
+      }
+    },
+  );
+
+  server.registerTool(
+    "list_distillers",
+    {
+      title: "List distillers",
+      description:
+        "List built-in distillers (synthetic voices distilled from public material — Garry Tan, PG, Naval, Karpathy, Steve Jobs, Munger, Bezos, etc.) plus user-defined ones. Voices are synthetic; not endorsed.",
+      inputSchema: ListDistillersInput.shape,
+    },
+    async (args) => {
+      try {
+        const parsed = ListDistillersInput.parse(args);
+        return ok(await listDistillers(parsed));
+      } catch (err) {
+        return fail(err);
+      }
+    },
+  );
+
+  server.registerTool(
+    "distill_voice_from_text",
+    {
+      title: "Distill voice from text",
+      description:
+        "Take a corpus of someone's public writing/talks/tweets and return a draft Distiller object plus instructions for the calling LLM to fill in the voice directive and signature phrases. Output voices are synthetic; not endorsed.",
+      inputSchema: DistillVoiceFromTextInput.shape,
+    },
+    async (args) => {
+      try {
+        const parsed = DistillVoiceFromTextInput.parse(args);
+        return ok(await distillVoiceFromText(parsed));
       } catch (err) {
         return fail(err);
       }

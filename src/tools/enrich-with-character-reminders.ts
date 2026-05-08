@@ -6,6 +6,13 @@ import {
   type Character,
 } from "../characters.js";
 import {
+  BUILT_IN_DISTILLERS,
+  DEFAULT_DISTILLERS_CONFIG_PATH,
+  loadCustomDistillers,
+  mergeDistillerPools,
+  type Distiller,
+} from "../distillers.js";
+import {
   DEFAULT_MEMORY_PATH,
   loadMemory,
   recentSimilarEvents,
@@ -43,29 +50,83 @@ const PER_EVENT_REWRITE_INSTRUCTION =
  * Conflict resolution by `name`: inline > persistent > built-in.
  */
 function resolveCharacterPool(
-  names: readonly string[] | undefined,
-  inline: readonly Character[],
-  persistent: readonly Character[],
+  characterNames: readonly string[] | undefined,
+  distillerNames: readonly string[] | undefined,
+  inlineCharacters: readonly Character[],
+  persistentCharacters: readonly Character[],
+  inlineDistillers: readonly Distiller[],
+  persistentDistillers: readonly Distiller[],
 ): Character[] {
-  const merged = mergeCharacterPools(BUILT_IN_CHARACTERS, persistent, inline);
-  if (!names || names.length === 0) {
-    return merged;
+  const mergedCharacters = mergeCharacterPools(
+    BUILT_IN_CHARACTERS,
+    persistentCharacters,
+    inlineCharacters,
+  );
+  const mergedDistillers = mergeDistillerPools(
+    BUILT_IN_DISTILLERS,
+    persistentDistillers,
+    inlineDistillers,
+  );
+
+  // Distillers extend Character — they're assignable to the Character pool
+  // unchanged. Distiller fields (attribution, signature_phrases) survive on
+  // the object and are read by buildEnrichmentResult below.
+  const haveExplicitFilter =
+    (characterNames && characterNames.length > 0) || (distillerNames && distillerNames.length > 0);
+
+  if (!haveExplicitFilter) {
+    // Default: characters + distillers merged into one pool, conflicts by name.
+    const byName = new Map<string, Character>();
+    for (const c of mergedCharacters) {
+      byName.set(c.name, c);
+    }
+    for (const d of mergedDistillers) {
+      byName.set(d.name, d);
+    }
+    return Array.from(byName.values());
   }
-  const byName = new Map(merged.map((c) => [c.name, c]));
+
   const out: Character[] = [];
-  const unknown: string[] = [];
-  for (const n of names) {
-    const c = byName.get(n);
-    if (!c) {
-      unknown.push(n);
-    } else {
-      out.push(c);
+  const unknownChars: string[] = [];
+  const unknownDistillers: string[] = [];
+  if (characterNames && characterNames.length > 0) {
+    const byName = new Map(mergedCharacters.map((c) => [c.name, c]));
+    for (const n of characterNames) {
+      const c = byName.get(n);
+      if (!c) {
+        unknownChars.push(n);
+      } else {
+        out.push(c);
+      }
     }
   }
-  if (unknown.length > 0) {
-    throw new Error(`Unknown character name(s): ${unknown.join(", ")}`);
+  if (distillerNames && distillerNames.length > 0) {
+    const byName = new Map(mergedDistillers.map((d) => [d.name, d]));
+    for (const n of distillerNames) {
+      const d = byName.get(n);
+      if (!d) {
+        unknownDistillers.push(n);
+      } else {
+        out.push(d);
+      }
+    }
+  }
+  if (unknownChars.length > 0) {
+    throw new Error(`Unknown character name(s): ${unknownChars.join(", ")}`);
+  }
+  if (unknownDistillers.length > 0) {
+    throw new Error(`Unknown distiller name(s): ${unknownDistillers.join(", ")}`);
   }
   return out;
+}
+
+function isDistiller(value: Character): value is Distiller {
+  const v = value as Partial<Distiller>;
+  return (
+    typeof v.attribution === "string" &&
+    Array.isArray(v.signature_phrases) &&
+    Array.isArray(v.worldview_tags)
+  );
 }
 
 function scoreCharacterAgainstEvent(character: Character, event: CalendarEvent): number {
@@ -124,14 +185,24 @@ interface BuildEnrichmentInput {
   memory: MemoryFile;
   /** Persisted user-defined characters loaded from the config file. */
   persistentCharacters?: readonly Character[];
+  /** Persisted user-defined distillers loaded from the config file. */
+  persistentDistillers?: readonly Distiller[];
 }
 
 export function buildEnrichmentResult(
   input: BuildEnrichmentInput,
 ): EnrichWithCharacterRemindersResult {
-  const { args, events, memory, persistentCharacters = [] } = input;
-  const inline = (args.custom_characters ?? []) as readonly Character[];
-  const pool = resolveCharacterPool(args.character_pool, inline, persistentCharacters);
+  const { args, events, memory, persistentCharacters = [], persistentDistillers = [] } = input;
+  const inlineCharacters = (args.custom_characters ?? []) as readonly Character[];
+  const inlineDistillers = (args.custom_distillers ?? []) as readonly Distiller[];
+  const pool = resolveCharacterPool(
+    args.character_pool,
+    args.distiller_pool,
+    inlineCharacters,
+    persistentCharacters,
+    inlineDistillers,
+    persistentDistillers,
+  );
   const sorted = events.toSorted((a, b) => Date.parse(a.start) - Date.parse(b.start));
   const assignment = assignCharacters(sorted, pool, args.seed);
   const usedNames = new Set<string>();
@@ -173,6 +244,10 @@ export function buildEnrichmentResult(
     if (evt.url !== undefined) {
       out.url = evt.url;
     }
+    if (isDistiller(character)) {
+      out.distiller_attribution = character.attribution;
+      out.distiller_signature_phrases = character.signature_phrases;
+    }
     return out;
   });
 
@@ -202,11 +277,21 @@ export async function enrichWithCharacterReminders(
   args: EnrichWithCharacterRemindersArgs,
   memoryPath: string = DEFAULT_MEMORY_PATH,
   charactersConfigPath: string = DEFAULT_CHARACTERS_CONFIG_PATH,
+  distillersConfigPath: string = DEFAULT_DISTILLERS_CONFIG_PATH,
 ): Promise<EnrichWithCharacterRemindersResult> {
   const events = await collectEvents(args);
   const memory = loadMemory(memoryPath);
   const persistentCharacters = args.use_persistent_config
     ? loadCustomCharacters(charactersConfigPath)
     : [];
-  return buildEnrichmentResult({ args, events, memory, persistentCharacters });
+  const persistentDistillers = args.use_persistent_config
+    ? loadCustomDistillers(distillersConfigPath)
+    : [];
+  return buildEnrichmentResult({
+    args,
+    events,
+    memory,
+    persistentCharacters,
+    persistentDistillers,
+  });
 }

@@ -4,6 +4,19 @@ All notable changes to `haunted-mcp` (formerly `apple-calendar-mcp`, then `heckl
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.3.0] - 2026-05-07
+
+### Added
+
+- Distillers — synthetic voices of specific named people (Garry Tan, Paul Graham, Naval Ravikant, Sam Altman, Steve Jobs, Andrej Karpathy, Marc Andreessen, Jeff Bezos, Charlie Munger, Brian Chesky, Joan Didion, plus an "Old Founder" archetype fallback). Built-in pool of 12; user can add more at `~/.apple-calendar-mcp/distillers.json` or inline.
+- New tool: `list_distillers` — enumerate available distillers, filter by `worldview_filter` or `name_filter`. Output carries the synthetic-voice disclaimer at every layer.
+- New tool: `distill_voice_from_text` — orchestrator that lets the calling LLM analyse a user-supplied corpus and fill in a draft Distiller (`directive`, `signature_phrases`).
+- `enrich_with_character_reminders` now accepts `distiller_pool[]` and `custom_distillers[]`; distillers merge with characters into one assignment pool. Output events carry `distiller_attribution` + `distiller_signature_phrases` when the assigned voice is a distiller.
+
+### Note
+
+- Each distiller carries an `attribution` field marking the voice as synthetic / not endorsed by the named individual. Same disclaimer surfaced in `list_distillers` envelope `notice` and embedded in every directive.
+
 ## [0.2.1] - 2026-05-07
 
 ### Renamed

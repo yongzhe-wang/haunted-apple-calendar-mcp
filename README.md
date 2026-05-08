@@ -86,6 +86,11 @@ Each character has a `directive` — a short system prompt for that voice. Tell 
 - `apply_character_reminders` — mutate Calendar.app titles with Claude-composed sentences (with backup)
 - `revert_character_reminders` — restore originals from the embedded backup block
 
+### Distillers
+
+- `list_distillers` — enumerate synthetic voices distilled from public material of named people (Garry Tan, PG, Naval, Karpathy, Steve Jobs, Bezos, Munger, …)
+- `distill_voice_from_text` — supply a corpus, get a draft Distiller object back for the LLM to fill in
+
 [Full reference: docs/tools.md](docs/tools.md)
 
 ## Calendar Memory & Character Reminders
@@ -157,10 +162,34 @@ Field reference: `name` (unique, ≤64 chars), `short_label` (≤16 chars, embed
 
 **Conflict resolution by `name`:** inline > persistent config > built-in. So `custom_characters: [{ "name": "Mom", ... }]` overrides the built-in Mom for that call. Set `use_persistent_config: false` to ignore the on-disk file (e.g. for fully reproducible runs across machines).
 
+## Distillers
+
+Where Characters are relational archetypes ("Mom", "Coach", "Past-you"), **Distillers** are synthetic voices distilled from the public writing, talks, and tweets of specific named people. Use them when you want a calendar entry that sounds like Garry Tan would have written it, or PG, or Naval, or Steve Jobs.
+
+Built-in pool (12 distillers, all carry the disclaimer "Synthetic voice distilled from public material. Not endorsed by the named individual."):
+
+`Garry Tan`, `Paul Graham`, `Naval Ravikant`, `Sam Altman`, `Steve Jobs`, `Andrej Karpathy`, `Marc Andreessen`, `Jeff Bezos`, `Charlie Munger`, `Brian Chesky`, `Joan Didion`, plus an `Old Founder` archetype for fallback.
+
+Use them in `enrich_with_character_reminders` via `distiller_pool`:
+
+```json
+{
+  "start_date": "2026-05-01T00:00:00Z",
+  "end_date": "2026-05-08T00:00:00Z",
+  "distiller_pool": ["Garry Tan", "Naval Ravikant"],
+  "character_pool": ["Coach"]
+}
+```
+
+Distillers and characters merge into one assignment pool; conflicts resolve by name with inline > persistent > built-in. Persist your own at `~/.apple-calendar-mcp/distillers.json` (`{ "version": 1, "distillers": [...] }`, parent dir `0700`, file `0600`). To distill yourself or someone else from a text corpus, call `distill_voice_from_text` — the MCP server has no LLM, so the tool returns a placeholder Distiller and instructions for the calling LLM to fill in `directive` and `signature_phrases`.
+
+Every Distiller carries an `attribution` field, every directive ends with "Synthetic voice; not endorsed.", and `list_distillers` repeats the disclaimer at the envelope level.
+
 ## Configuration
 
 - **Memory:** `~/.apple-calendar-mcp/memory.json` (mode `0600`)
 - **Custom characters:** `~/.apple-calendar-mcp/characters.json` (mode `0600`)
+- **Custom distillers:** `~/.apple-calendar-mcp/distillers.json` (mode `0600`)
 - **Snapshots:** `~/.apple-calendar-mcp/last_apply_backup_*.json`
 
 The data directory path is **kept** at `~/.apple-calendar-mcp/` across renames (HECKLE in v0.2.0, HAUNTED in v0.2.1), so existing users don't lose memory or custom characters.

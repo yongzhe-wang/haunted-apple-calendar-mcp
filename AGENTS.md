@@ -8,7 +8,7 @@ Telegraph style. Root rules only. This file is for AI coding agents opening this
 
 - **Name:** HAUNTED (`haunted-mcp`)
 - **Purpose:** MCP server exposing macOS Calendar.app to Claude (and any other MCP client) via AppleScript.
-- **Scope:** single-package, single-binary CLI. Fifteen tools. Stdio transport only.
+- **Scope:** single-package, single-binary CLI. Seventeen tools. Stdio transport only.
 - **Platform:** macOS only (`package.json` declares `"os": ["darwin"]`).
 - **Runtime:** Node 22.14+.
 - **Package manager:** pnpm 10.33.0 (see `packageManager` field).
@@ -25,6 +25,7 @@ src/
   personas.ts           # built-in persona directives for list_events_in_persona
   voices.ts             # built-in 30+ voice pool for list_events_in_mixed_personas
   characters.ts         # relational character pool (Mom/Friend/Coach/...) for character-reminder tools
+  distillers.ts         # synthetic-voice distiller pool (Garry Tan/PG/Naval/...) — extends Character
   memory.ts             # ~/.apple-calendar-mcp/memory.json layer + queryByPerson/Topic/DateRange/recentSimilarEvents
   tools/
     list-calendars.ts
@@ -42,6 +43,8 @@ src/
     enrich-with-character-reminders.ts  # events + character_label + character_directive + memory_context per event
     apply-character-reminders.ts        # mutate titles, embed backup block in notes, write snapshot
     revert-character-reminders.ts       # restore originals from backup blocks across writable calendars
+    list-distillers.ts                  # enumerate distillers with optional worldview/name filter
+    distill-voice-from-text.ts          # orchestrator: returns draft Distiller + corpus + LLM instructions
   util/
     concurrency.ts      # mapWithConcurrency, shared bounded fan-out helper
 test/

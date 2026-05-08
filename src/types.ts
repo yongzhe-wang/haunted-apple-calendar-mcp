@@ -339,6 +339,22 @@ const InlineCharacterSchema = z.object({
   default: z.boolean().optional(),
 });
 
+// Inline distiller definitions accepted via the tool call. Mirrors the
+// `Distiller` interface in distillers.ts. Directive is allowed up to 400
+// chars (vs. 300 for character) because a distiller's voice fingerprint
+// usually needs more pet-phrases + worldview detail.
+const InlineDistillerSchema = z.object({
+  name: z.string().min(1).max(64),
+  short_label: z.string().min(1).max(16),
+  directive: z.string().min(1).max(400),
+  attribution: z.string().min(1).max(300),
+  signature_phrases: z.array(z.string().max(128)).max(12),
+  worldview_tags: z.array(z.string().max(64)).max(16),
+  representative_url: z.string().max(512).optional(),
+  triggers: z.array(z.string().max(64)).max(32).optional(),
+  default: z.boolean().optional(),
+});
+
 export const EnrichWithCharacterRemindersInputObject = z.object({
   start_date: isoDate,
   end_date: isoDate,
@@ -354,6 +370,12 @@ export const EnrichWithCharacterRemindersInputObject = z.object({
   // When false, skip reading ~/.apple-calendar-mcp/characters.json. Lets the
   // caller get a fully reproducible run regardless of host machine state.
   use_persistent_config: z.boolean().default(true),
+  // Distillers — synthetic voices distilled from public material of specific
+  // named people (Garry Tan, PG, Naval, etc.). Merge alongside characters
+  // into one assignment pool; conflict resolution by name (inline > persistent
+  // > built-in).
+  distiller_pool: z.array(z.string().max(64)).max(64).optional(),
+  custom_distillers: z.array(InlineDistillerSchema).max(30).optional(),
 });
 
 export const EnrichWithCharacterRemindersInput = EnrichWithCharacterRemindersInputObject.refine(
@@ -369,6 +391,12 @@ export const EnrichedCharacterEventSchema = EventSchema.extend({
   character_directive: z.string(),
   memory_context: z.array(MemoryEventSchema),
   rewrite_instruction: z.string(),
+  // Populated only when the assigned voice is a Distiller (vs. a Character).
+  // `attribution` is the synthetic-voice disclaimer; `signature_phrases` are
+  // the verbatim phrases the distiller tends to use, for richer rewrite
+  // context. Both omitted on plain Characters.
+  distiller_attribution: z.string().optional(),
+  distiller_signature_phrases: z.array(z.string()).optional(),
 });
 
 export const EnrichWithCharacterRemindersOutput = z.object({
@@ -437,3 +465,63 @@ export type ApplyCharacterRemindersArgs = z.infer<typeof ApplyCharacterReminders
 export type ApplyCharacterRemindersResult = z.infer<typeof ApplyCharacterRemindersOutput>;
 export type RevertCharacterRemindersArgs = z.infer<typeof RevertCharacterRemindersInput>;
 export type RevertCharacterRemindersResult = z.infer<typeof RevertCharacterRemindersOutput>;
+
+// ----- Distillers -----
+
+export const ListDistillersInput = z.object({
+  worldview_filter: z.string().max(64).optional(),
+  name_filter: z.string().max(128).optional(),
+  use_persistent_config: z.boolean().default(true),
+});
+
+const DistillerOutputSchema = z.object({
+  name: z.string(),
+  short_label: z.string(),
+  // Synthetic-voice disclaimer. Each distiller carries this so callers see
+  // the "not endorsed by the named individual" statement at every layer.
+  attribution: z.string(),
+  signature_phrases: z.array(z.string()),
+  worldview_tags: z.array(z.string()),
+  representative_url: z.string().optional(),
+  triggers: z.array(z.string()).optional(),
+  default: z.boolean().optional(),
+});
+
+export const ListDistillersOutput = z.object({
+  distillers: z.array(DistillerOutputSchema),
+  total: z.number().int(),
+  source: z.enum(["built-in", "persistent", "merged"]),
+  // Repeated at the envelope level so a thin client that only logs the
+  // top-level summary still sees the synthetic-voice disclaimer.
+  notice: z.string(),
+});
+
+export type ListDistillersArgs = z.infer<typeof ListDistillersInput>;
+export type ListDistillersResult = z.infer<typeof ListDistillersOutput>;
+
+export const DistillVoiceFromTextInput = z.object({
+  name: z.string().min(1).max(64),
+  short_label: z.string().min(1).max(16),
+  corpus_text: z.string().min(20).max(50_000),
+  worldview_tags: z.array(z.string().max(64)).max(16).default([]),
+  triggers: z.array(z.string().max(64)).max(32).default([]),
+  representative_url: z.string().max(512).optional(),
+});
+
+export const DistillVoiceFromTextOutput = z.object({
+  draft_distiller: z.object({
+    name: z.string(),
+    short_label: z.string(),
+    attribution: z.string(),
+    worldview_tags: z.array(z.string()),
+    triggers: z.array(z.string()),
+    directive: z.string(),
+    signature_phrases: z.array(z.string()),
+    representative_url: z.string().optional(),
+  }),
+  corpus_text: z.string(),
+  generation_instructions: z.string(),
+});
+
+export type DistillVoiceFromTextArgs = z.infer<typeof DistillVoiceFromTextInput>;
+export type DistillVoiceFromTextResult = z.infer<typeof DistillVoiceFromTextOutput>;

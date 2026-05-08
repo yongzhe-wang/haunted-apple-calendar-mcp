@@ -5,7 +5,7 @@ import { describe, expect, it } from "vitest";
 import { BUILT_IN_CHARACTERS } from "../src/characters.js";
 import { emptyMemory, type MemoryFile } from "../src/memory.js";
 import {
-  REWRITE_TEMPLATE,
+  REWRITE_INSTRUCTIONS,
   assignCharacters,
   buildEnrichmentResult,
 } from "../src/tools/enrich-with-character-reminders.js";
@@ -113,7 +113,12 @@ describe("buildEnrichmentResult", () => {
 
   it("returns the documented rewrite_template verbatim", () => {
     const out = buildEnrichmentResult({ args: baseArgs, events: [], memory: emptyMemory() });
-    expect(out.rewrite_template).toBe(REWRITE_TEMPLATE);
+    expect(out.rewrite_template).toBe(REWRITE_INSTRUCTIONS);
+  });
+
+  it("REWRITE_INSTRUCTIONS hardens against fabrication", () => {
+    expect(REWRITE_INSTRUCTIONS).toContain("do NOT invent");
+    expect(REWRITE_INSTRUCTIONS).toContain("first time on calendar");
   });
 
   it("attaches memory_context when include_memory_context=true", () => {

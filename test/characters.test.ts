@@ -42,6 +42,14 @@ describe("BUILT_IN_CHARACTERS", () => {
     }
   });
 
+  it("every directive includes an anti-fabrication clause", () => {
+    for (const c of BUILT_IN_CHARACTERS) {
+      expect(c.directive, `${c.name} missing anti-fabrication clause`).toMatch(
+        /Anti-fabrication|never invent/i,
+      );
+    }
+  });
+
   it("non-default characters have at least one trigger", () => {
     for (const c of BUILT_IN_CHARACTERS) {
       if (!c.default) {

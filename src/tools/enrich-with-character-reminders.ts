@@ -31,11 +31,17 @@ import { listEvents } from "./list-events.js";
 
 const ENRICH_FAN_OUT_CONCURRENCY = 4;
 
-export const REWRITE_TEMPLATE =
-  'For each event:\n1. Read the character_directive and the memory_context_items.\n2. Compose ONE sentence in the character\'s voice that references at least one memory_context_item by event title or by a recognizable detail.\n3. Output the new title in this exact format: "{original_title} — {character_label}: {your_sentence}"\n4. Keep total title length ≤ 100 chars; truncate the sentence first if needed.';
+export const REWRITE_INSTRUCTIONS =
+  "For each event:\n" +
+  "1. Read the character_directive and the memory_context_items array.\n" +
+  "2. If memory_context_items is NON-EMPTY: reference at least one item BY ITS LITERAL TITLE OR DATE in your sentence. do NOT invent counts or dates that are not in memory_context_items. If you say 'the 5th time' or 'since spring', memory_context_items MUST contain at least 4 prior matching events to back that claim.\n" +
+  "3. If memory_context_items is EMPTY: your sentence MUST acknowledge that the event has no prior instances on the calendar. Allowed honest phrasings: 'first time on calendar', 'no precedent', 'the first instance becomes the seed', '初见于此'. do NOT invent a 'Nth' count, a date, or a prior-event title.\n" +
+  '4. Output the new title in the format: "{original_title} — {character_label}: {your_sentence}".\n' +
+  "5. Keep total title length ≤ 100 chars.\n" +
+  "6. NEVER fabricate. The voice is the wrapper; the memory references must be true. Without truth, the joke has no punch.";
 
 const PER_EVENT_REWRITE_INSTRUCTION =
-  "Compose ONE sentence in this character's voice that references at least one memory_context item; output as `{original_title} — {character_label}: {sentence}` and keep total ≤100 chars.";
+  "Compose ONE sentence in this character's voice. If memory_context is non-empty, reference at least one item by its literal title or date — do NOT invent counts or dates not in memory_context. If memory_context is empty, say 'first time on calendar' (or '初见于此') honestly. Output as `{original_title} — {character_label}: {sentence}`, ≤100 chars total. Never fabricate.";
 
 /**
  * Resolve the final character pool used for assignment.
@@ -254,7 +260,7 @@ export function buildEnrichmentResult(
   return {
     events: outEvents,
     characters_used: Array.from(usedNames),
-    rewrite_template: REWRITE_TEMPLATE,
+    rewrite_template: REWRITE_INSTRUCTIONS,
   };
 }
 

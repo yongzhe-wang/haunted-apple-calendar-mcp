@@ -43,6 +43,14 @@ describe("BUILT_IN_DISTILLERS", () => {
     }
   });
 
+  it("every directive includes an anti-fabrication clause", () => {
+    for (const d of BUILT_IN_DISTILLERS) {
+      expect(d.directive, `${d.name} missing anti-fabrication clause`).toMatch(
+        /Anti-fabrication|never invent/i,
+      );
+    }
+  });
+
   it("every directive references memory_context", () => {
     for (const d of BUILT_IN_DISTILLERS) {
       expect(d.directive, `${d.name} missing memory reference`).toMatch(/memory_context|memory/i);

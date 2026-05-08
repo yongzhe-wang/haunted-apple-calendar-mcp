@@ -11,6 +11,10 @@
   <a href="https://www.npmjs.com/package/haunted-apple-calendar-mcp"><img alt="npm version" src="https://img.shields.io/npm/v/haunted-apple-calendar-mcp.svg"></a>
 </p>
 
+<p align="center">
+  💬 open Claude Code · 📩 paste your event · 🔌 MCP · 🎭 characters as skills · 📅 calendar item · ☁️ sync everywhere
+</p>
+
 ![HAUNTED Apple Calendar MCP — sample event cards in different characters' voices, rendered by Claude](docs/screenshots/haunted-hero-cards.png)
 
 > **HAUNTED** is an open-source **Apple Calendar MCP server** for **Claude Desktop**, **Claude Code**, and any [Model Context Protocol](https://modelcontextprotocol.io) client. It gives Claude full read/write access to your **macOS Calendar.app** via [AppleScript](https://developer.apple.com/library/archive/documentation/AppleScript/Conceptual/AppleScriptLangGuide/) — plus 12 relational characters and 15 synthetic distillers (Mom, Future-you, Garry Tan, Alan Turing, LeBron James, …) that comment on every calendar event with one-line reminders grounded in your past calendar history. macOS-only, local-only, fully reversible.

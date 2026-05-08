@@ -1,32 +1,41 @@
 {
-  "name": "haunted-mcp",
-  "version": "0.3.1",
-  "description": "Haunted: an MCP server that lets the people who know you comment on every event in your Apple Calendar. Built-in characters, custom characters, persistent memory.",
+  "name": "haunted-apple-calendar-mcp",
+  "version": "0.4.0",
+  "description": "Apple Calendar MCP server for Claude — HAUNTED gives Claude Desktop and Claude Code full read/write access to your macOS Calendar.app, with 12 relational characters and 15 synthetic distiller voices that comment on every event using your past calendar memory.",
   "keywords": [
     "apple-calendar",
+    "apple-calendar-mcp",
     "applescript",
     "calendar",
+    "calendar-mcp",
     "characters",
     "claude",
+    "claude-code",
+    "claude-desktop",
+    "distillers",
     "haunted",
     "macos",
+    "macos-calendar",
     "mcp",
+    "mcp-server",
     "memento-mori",
     "memory",
+    "model-context-protocol",
     "personas"
   ],
-  "homepage": "https://github.com/yongzhe-wang/haunted-mcp#readme",
+  "homepage": "https://github.com/yongzhe-wang/haunted-apple-calendar-mcp#readme",
   "bugs": {
-    "url": "https://github.com/yongzhe-wang/haunted-mcp/issues"
+    "url": "https://github.com/yongzhe-wang/haunted-apple-calendar-mcp/issues"
   },
   "license": "MIT",
   "author": "Yongzhe Wang",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/yongzhe-wang/haunted-mcp.git"
+    "url": "git+https://github.com/yongzhe-wang/haunted-apple-calendar-mcp.git"
   },
   "bin": {
-    "haunted": "dist/index.js"
+    "haunted": "dist/index.js",
+    "haunted-apple-calendar-mcp": "dist/index.js"
   },
   "files": [
     "CHANGELOG.md",

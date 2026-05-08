@@ -61,8 +61,8 @@ function fail(err: unknown): { content: ToolContent[]; isError: true } {
 async function main(): Promise<void> {
   const server = new McpServer(
     {
-      name: "haunted-mcp",
-      version: "0.3.0",
+      name: "haunted-apple-calendar-mcp",
+      version: "0.4.0",
     },
     {
       capabilities: { tools: {} },

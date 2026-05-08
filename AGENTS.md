@@ -6,13 +6,13 @@ Telegraph style. Root rules only. This file is for AI coding agents opening this
 
 ## Project
 
-- **Name:** HAUNTED (`haunted-mcp`)
+- **Name:** HAUNTED (`haunted-apple-calendar-mcp`)
 - **Purpose:** MCP server exposing macOS Calendar.app to Claude (and any other MCP client) via AppleScript.
 - **Scope:** single-package, single-binary CLI. Seventeen tools. Stdio transport only.
 - **Platform:** macOS only (`package.json` declares `"os": ["darwin"]`).
 - **Runtime:** Node 22.14+.
 - **Package manager:** pnpm 10.33.0 (see `packageManager` field).
-- **Repo:** <https://github.com/yongzhe-wang/haunted-mcp>
+- **Repo:** <https://github.com/yongzhe-wang/haunted-apple-calendar-mcp>
 
 ## File layout
 

@@ -1,21 +1,42 @@
-<p align="center"><img src="docs/assets/logo.svg" width="240"></p>
-<h1 align="center">HAUNTED</h1>
-<p align="center"><i>A calendar haunted by people who know you.</i></p>
+<p align="center"><img src="docs/assets/logo.svg" alt="HAUNTED Apple Calendar MCP server logo — a calendar haunted by people who know you" width="720"></p>
+
+<h1 align="center">🎭 HAUNTED — Apple Calendar MCP for Claude</h1>
+<p align="center"><i>A calendar haunted by people who know you. The open-source Apple Calendar MCP server for Claude Desktop, Claude Code, and any MCP-compatible client.</i></p>
 
 <p align="center">
-  <a href="LICENSE"><img src="https://img.shields.io/badge/license-MIT-blue.svg"></a>
-  <img src="https://img.shields.io/badge/tests-265%20passing-green.svg">
-  <img src="https://img.shields.io/badge/MCP-compatible-purple.svg">
-  <img src="https://img.shields.io/badge/macOS-only-lightgrey.svg">
+  <a href="LICENSE"><img alt="MIT license" src="https://img.shields.io/badge/license-MIT-blue.svg"></a>
+  <img alt="265 tests passing" src="https://img.shields.io/badge/tests-265%20passing-green.svg">
+  <a href="https://modelcontextprotocol.io"><img alt="MCP compatible — Model Context Protocol" src="https://img.shields.io/badge/MCP-compatible-purple.svg"></a>
+  <img alt="macOS only" src="https://img.shields.io/badge/macOS-only-lightgrey.svg">
+  <a href="https://www.npmjs.com/package/haunted-apple-calendar-mcp"><img alt="npm version" src="https://img.shields.io/npm/v/haunted-apple-calendar-mcp.svg"></a>
 </p>
 
-![HAUNTED — sample event cards in different characters' voices](docs/screenshots/haunted-hero-cards.png)
+![HAUNTED Apple Calendar MCP — sample event cards in different characters' voices, rendered by Claude](docs/screenshots/haunted-hero-cards.png)
 
-> HAUNTED is an MCP server that lets the people who know you comment on every event in your Apple Calendar. Mom, your friend, your future self, your therapist, your bartender — they all leave one-line notes referencing your past calendar history. macOS-only, local-only, fully reversible.
+> **HAUNTED** is an open-source **Apple Calendar MCP server** for **Claude Desktop**, **Claude Code**, and any [Model Context Protocol](https://modelcontextprotocol.io) client. It gives Claude full read/write access to your **macOS Calendar.app** via [AppleScript](https://developer.apple.com/library/archive/documentation/AppleScript/Conceptual/AppleScriptLangGuide/) — plus 12 relational characters and 15 synthetic distillers (Mom, Future-you, Garry Tan, Alan Turing, LeBron James, …) that comment on every calendar event with one-line reminders grounded in your past calendar history. macOS-only, local-only, fully reversible.
 
-[GitHub](https://github.com/yongzhe-wang/haunted-mcp) · [Docs](docs/) · [Changelog](CHANGELOG.md) · [Security](SECURITY.md) · [Contributing](CONTRIBUTING.md)
+[GitHub](https://github.com/yongzhe-wang/haunted-apple-calendar-mcp) · [npm](https://www.npmjs.com/package/haunted-apple-calendar-mcp) · [Docs](docs/) · [Changelog](CHANGELOG.md) · [Security](SECURITY.md) · [Contributing](CONTRIBUTING.md)
 
-## Quickstart
+## Table of contents
+
+- [What is HAUNTED?](#what-is-haunted)
+- [How to install Apple Calendar MCP for Claude](#how-to-install-apple-calendar-mcp-for-claude)
+- [Customizing what HAUNTED says](#customizing-what-haunted-says)
+- [Tools — 17 MCP server tools for macOS Calendar](#tools--17-mcp-server-tools-for-macos-calendar)
+- [Calendar Memory & Character Reminders](#calendar-memory--character-reminders)
+- [Define your own characters](#define-your-own-characters)
+- [Distillers — synthetic voices of named people](#distillers--synthetic-voices-of-named-people)
+- [Configuration](#configuration)
+- [How HAUNTED works (architecture)](#how-haunted-works-architecture)
+- [Security](#security)
+- [Development](#development)
+- [FAQ — Apple Calendar + MCP + Claude integration](#faq--apple-calendar--mcp--claude-integration)
+
+## What is HAUNTED?
+
+HAUNTED is an **Apple Calendar MCP server**: a small Node.js binary that speaks the [Model Context Protocol](https://modelcontextprotocol.io) over stdio and exposes your **macOS Calendar.app** to Claude. It is open-source, local-only, has no network calls, and ships 17 MCP tools across CRUD, analytics, personas, character memory, and distillers. If you want Claude to actually read and write the calendar on your Mac — and to do it with personality — this is the MCP server for that.
+
+## How to install Apple Calendar MCP for Claude
 
 ### Claude Desktop / Claude Code
 
@@ -26,17 +47,17 @@
   "mcpServers": {
     "haunted": {
       "command": "npx",
-      "args": ["-y", "haunted-mcp"]
+      "args": ["-y", "haunted-apple-calendar-mcp"]
     }
   }
 }
 ```
 
-2. Grant Claude full access to Calendar.app: **System Settings → Privacy & Security → Automation → Claude → Calendar** (enable). See [docs/permissions.md](docs/permissions.md) if it doesn't appear.
+2. Grant Claude full access to **Calendar.app**: **System Settings → Privacy & Security → Automation → Claude → Calendar** (enable). See [docs/permissions.md](docs/permissions.md) if it doesn't appear.
 3. Restart Claude.
 4. Ask: _"What's on my calendar this week?"_
 
-(Replace the `haunted` key with whatever name you want to call it in chat.)
+(Replace the `haunted` key with whatever name you want to call the MCP server in chat.)
 
 ## Customizing what HAUNTED says
 
@@ -44,20 +65,21 @@ The character system is the heart of HAUNTED — and it's designed to be customi
 
 1. **Pick from 12 built-in characters** (Mom, Friend, Coach, Therapist, Past-you, Future-you, Werner, Aurelius, Barkeep, Old friend, 夫子, Dog) — no setup required.
 2. **Define inline custom characters per call** — pass `custom_characters: [...]` to `enrich_with_character_reminders` for a one-off render.
-3. **Persist your character roster** at `~/.apple-calendar-mcp/characters.json` — every future call merges these in alongside the built-ins.
+3. **Persist your character roster** at `~/.apple-calendar-mcp/characters.json` — every future call merges these in alongside the built-ins. (The `~/.apple-calendar-mcp/` data path is **preserved across renames** so existing users keep their memory.)
 
 Each character has a `directive` — a short system prompt for that voice. Tell Claude _exactly_ who that person is to you, what they care about, what they would notice. The directive is the lever for tuning what gets said. See [Define your own characters](#define-your-own-characters) below for the full schema.
 
 ## What HAUNTED does
 
-- **15 tools** across 4 categories (CRUD, Analytics, Personas, Character Memory)
+- **17 MCP tools** across 5 categories (CRUD, Analytics, Personas, Character Memory, Distillers)
 - **12 built-in relational characters** — bring your own with `~/.apple-calendar-mcp/characters.json`
+- **15 built-in distillers** — synthetic voices of specific named people (Garry Tan, Naval, Karpathy, …)
 - **Persistent calendar memory** across years; commentary references specific past events
 - **Fully reversible** — every mutation embeds a sentinel-marked backup; revert with one tool call
 
 [See docs/examples.md for 8 real prompt → result walk-throughs.](docs/examples.md)
 
-## Tools (grouped)
+## Tools — 17 MCP server tools for macOS Calendar
 
 ### CRUD
 
@@ -71,7 +93,7 @@ Each character has a `directive` — a short system prompt for that voice. Tell 
 ### Analytics
 
 - `time_per_calendar` — total timed-event duration per calendar over a window
-- `mortality_overlay` — per-event % of an N-year waking life consumed
+- `mortality_overlay` — per-event % of an N-year waking life consumed (memento mori)
 
 ### Personas
 
@@ -88,7 +110,7 @@ Each character has a `directive` — a short system prompt for that voice. Tell 
 
 ### Distillers
 
-- `list_distillers` — enumerate synthetic voices distilled from public material of named people (Garry Tan, PG, Naval, Karpathy, Steve Jobs, Bezos, Munger, …)
+- `list_distillers` — enumerate synthetic voices distilled from public material of named people (Garry Tan, PG, Naval, Karpathy, Steve Jobs, Bezos, Munger, Alan Turing, LeBron James, Hilary Hahn, …)
 - `distill_voice_from_text` — supply a corpus, get a draft Distiller object back for the LLM to fill in
 
 [Full reference: docs/tools.md](docs/tools.md)
@@ -162,9 +184,9 @@ Field reference: `name` (unique, ≤64 chars), `short_label` (≤16 chars, embed
 
 **Conflict resolution by `name`:** inline > persistent config > built-in. So `custom_characters: [{ "name": "Mom", ... }]` overrides the built-in Mom for that call. Set `use_persistent_config: false` to ignore the on-disk file (e.g. for fully reproducible runs across machines).
 
-## Distillers
+## Distillers — synthetic voices of named people
 
-Where Characters are relational archetypes ("Mom", "Coach", "Past-you"), **Distillers** are synthetic voices distilled from the public writing, talks, and tweets of specific named people. Use them when you want a calendar entry that sounds like Garry Tan would have written it, or PG, or Naval, or Steve Jobs.
+Where Characters are relational archetypes ("Mom", "Coach", "Past-you"), **Distillers** are synthetic voices distilled from the public writing, talks, and tweets of specific named people. Use them when you want a calendar entry that sounds like Garry Tan would have written it, or Paul Graham, or Naval, or Steve Jobs.
 
 Built-in pool (15 distillers, all carry the disclaimer "Synthetic voice distilled from public material. Not endorsed by the named individual."):
 
@@ -192,11 +214,11 @@ Every Distiller carries an `attribution` field, every directive ends with "Synth
 - **Custom distillers:** `~/.apple-calendar-mcp/distillers.json` (mode `0600`)
 - **Snapshots:** `~/.apple-calendar-mcp/last_apply_backup_*.json`
 
-The data directory path is **kept** at `~/.apple-calendar-mcp/` across renames (HECKLE in v0.2.0, HAUNTED in v0.2.1), so existing users don't lose memory or custom characters.
+The data directory path is **kept** at `~/.apple-calendar-mcp/` across renames (HECKLE in v0.2.0, HAUNTED in v0.2.1, `haunted-apple-calendar-mcp` in v0.4.0), so existing users don't lose memory or custom characters.
 
 [See docs/permissions.md for macOS TCC setup.](docs/permissions.md)
 
-## Architecture
+## How HAUNTED works (architecture)
 
 stdio transport, AppleScript-only, no network, no native bindings. Three-phase tool pattern: pure script-builder + pure parser + async wrapper. Calendar.app `uid` is the event identifier. RS/US separators for parse output. Escape discipline locked into `escapeAppleScriptString`.
 
@@ -204,15 +226,15 @@ stdio transport, AppleScript-only, no network, no native bindings. Three-phase t
 
 ## Security
 
-Local-only. Threat surface: AppleScript injection (mitigated by escape discipline), stdio transport corruption (stderr-only logs), Calendar.app TCC scope (full read/write — be aware).
+Local-only. No network. Threat surface: AppleScript injection (mitigated by escape discipline), stdio transport corruption (stderr-only logs), Calendar.app TCC scope (full read/write — be aware).
 
 [Threat model: SECURITY.md](SECURITY.md)
 
 ## Development
 
 ```bash
-git clone https://github.com/yongzhe-wang/haunted-mcp.git
-cd haunted-mcp
+git clone https://github.com/yongzhe-wang/haunted-apple-calendar-mcp.git
+cd haunted-apple-calendar-mcp
 pnpm install
 pnpm test
 pnpm build
@@ -227,11 +249,45 @@ pnpm check
 - `pnpm knip` — unused code/deps
 - `pnpm check` — typecheck + lint + format:check + knip (same gate as CI)
 
+## FAQ — Apple Calendar + MCP + Claude integration
+
+### How do I connect Apple Calendar to Claude?
+
+Install this Apple Calendar MCP server with `npx -y haunted-apple-calendar-mcp`, register it in your `claude_desktop_config.json` under `mcpServers`, then grant Claude **Calendar Automation** in macOS System Settings → Privacy & Security → Automation. Restart Claude. Ask "what's on my calendar this week?" and Claude will use the MCP tools to read your macOS Calendar.app directly.
+
+### What is an MCP server?
+
+An MCP server is a small program that speaks the [Model Context Protocol](https://modelcontextprotocol.io) — Anthropic's open standard for letting LLMs call tools. HAUNTED is an MCP server for Apple Calendar: it exposes 17 calendar tools (list, search, create, update, delete, plus character/memory/distiller tools) so Claude can read and write your macOS Calendar.app.
+
+### Does this work with Claude Desktop AND Claude Code?
+
+Yes. Both Claude Desktop and Claude Code load MCP servers from `claude_desktop_config.json`. The same config block works for both. Any other MCP-compatible client (Cline, Continue, Zed, custom agents) can also use HAUNTED — it's a plain stdio MCP server.
+
+### Can I add my own characters or voices?
+
+Yes — that's the point. Drop a JSON file at `~/.apple-calendar-mcp/characters.json` (or `distillers.json`) and HAUNTED merges your roster into every `enrich_with_character_reminders` call alongside the 12 built-in characters and 15 built-in distillers. You can also pass `custom_characters: [...]` inline per tool call. See [Define your own characters](#define-your-own-characters).
+
+### Is HAUNTED safe? Does it call any external API?
+
+No external API. No network. HAUNTED only spawns `osascript` (the macOS AppleScript runtime) and reads/writes files in `~/.apple-calendar-mcp/` (mode `0600`). All event data stays on your Mac. The threat surface — AppleScript injection, stdio corruption, Calendar.app TCC scope — is documented in [SECURITY.md](SECURITY.md).
+
+### How do I revert if I don't like the changes Claude made to my calendar?
+
+Every `apply_character_reminders` call writes a sentinel-marked backup of the original title/notes/location into the event's notes field, _and_ a JSON snapshot to `~/.apple-calendar-mcp/last_apply_backup_<unix_ts>.json`. Call `revert_character_reminders` with the same date window and HAUNTED restores the originals from the embedded backup block. Fully reversible.
+
+### Why does HAUNTED require macOS?
+
+Because it talks to **Apple Calendar.app** through **AppleScript** (`osascript`). AppleScript is a macOS-only IPC mechanism. There is no equivalent path on Linux or Windows, so the package declares `"os": ["darwin"]` in `package.json`.
+
+### Does it work with Google Calendar, Outlook, or other calendars?
+
+Indirectly — if you've added your Google Calendar, Outlook, or iCloud account inside macOS Calendar.app, HAUNTED reads and writes through Calendar.app, so events in those accounts are visible. HAUNTED itself does not call Google/Microsoft APIs and has no concept of those services beyond the Calendar.app account name.
+
 ## Status & roadmap
 
-v0.2.1 — current. Renamed from `apple-calendar-mcp` → `heckle-mcp` → `haunted-mcp`. 15 tools, 265 tests, all gates green on macos-latest.
+v0.4.0 — current. Renamed for SEO from `apple-calendar-mcp` → `heckle-mcp` → `haunted-mcp` → `haunted-apple-calendar-mcp`. 17 tools, 265 tests, all gates green on macos-latest.
 
-Formerly published as `apple-calendar-mcp` and `heckle-mcp`. The package was renamed to `haunted-mcp` in v0.2.1; older names are no longer maintained.
+Formerly published as `apple-calendar-mcp`, `heckle-mcp`, and `haunted-mcp`. The package is now `haunted-apple-calendar-mcp` as of v0.4.0; older names are no longer maintained but the data directory `~/.apple-calendar-mcp/` is preserved.
 
 ## Contributing
 
@@ -243,4 +299,6 @@ MIT © Yongzhe Wang 2026
 
 ---
 
-_Haunted was built in one day during a hackathon, then iterated for two more. The character memory system was the moment it stopped being a calendar and became something stranger — every event narrated by a voice from your past._
+_HAUNTED — the Apple Calendar MCP server for Claude — was built in one day during a hackathon, then iterated for two more. The character memory system was the moment it stopped being a calendar and became something stranger — every event narrated by a voice from your past._
+
+[⬆ back to top](#-haunted--apple-calendar-mcp-for-claude)

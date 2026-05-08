@@ -1,8 +1,22 @@
 # Changelog
 
-All notable changes to `haunted-mcp` (formerly `apple-calendar-mcp`, then `heckle-mcp`) are documented here.
+All notable changes to `haunted-apple-calendar-mcp` (formerly `apple-calendar-mcp`, `heckle-mcp`, `haunted-mcp`) are documented here.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
+
+## [0.4.0] - 2026-05-08
+
+### Renamed
+
+- `haunted-mcp` → `haunted-apple-calendar-mcp` for discoverability. The "haunted" brand stays in the name; "apple-calendar-mcp" is restored verbatim so users searching GitHub / npm / Google for "apple calendar mcp" find this repo. Binary `haunted` still works; `haunted-apple-calendar-mcp` added as an alias bin.
+- GitHub repo: `yongzhe-wang/haunted-mcp` → `yongzhe-wang/haunted-apple-calendar-mcp`.
+- README rewritten for SEO: keyword-rich H1, FAQ section, expanded Tools section, alt text on every image, outbound links to canonical MCP / Apple / Claude docs.
+- Logo widened from 600×300 → 1200×400 so it renders at full readable size in GitHub's README pane and on social-card previews.
+
+### Note
+
+- Data directory `~/.apple-calendar-mcp/` is preserved across this rename. Existing users keep memory, custom characters, and custom distillers untouched.
+- MCP server `name` reported over the protocol is now `haunted-apple-calendar-mcp` (was `haunted-mcp`). Existing config blocks that key the server as `"haunted"` continue to work.
 
 ## [0.3.1] - 2026-05-08
 

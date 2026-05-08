@@ -26,7 +26,7 @@ Please file an issue marked `security` (or, if you prefer private disclosure, em
 
 Private disclosure via GitHub Security Advisories is preferred:
 
-- <https://github.com/yongzhe-wang/haunted-mcp/security/advisories/new>
+- <https://github.com/yongzhe-wang/haunted-apple-calendar-mcp/security/advisories/new>
 
 ## Reversibility
 

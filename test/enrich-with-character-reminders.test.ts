@@ -1,3 +1,6 @@
+import { mkdtempSync, writeFileSync } from "node:fs";
+import { tmpdir } from "node:os";
+import { join } from "node:path";
 import { describe, expect, it } from "vitest";
 import { BUILT_IN_CHARACTERS } from "../src/characters.js";
 import { emptyMemory, type MemoryFile } from "../src/memory.js";
@@ -45,13 +48,36 @@ describe("EnrichWithCharacterRemindersInput", () => {
     ).toThrow();
   });
 
-  it("rejects unknown character names", () => {
+  it("accepts arbitrary character_pool strings at the schema layer (validation deferred to merge step)", () => {
+    // Unknown names now fail at runtime in resolveCharacterPool, not at schema
+    // parse time, because user-defined characters from config/inline can show
+    // up here legitimately.
+    const out = EnrichWithCharacterRemindersInput.parse({
+      ...baseDates,
+      character_pool: ["NotARealCharacter"],
+    });
+    expect(out.character_pool).toEqual(["NotARealCharacter"]);
+  });
+
+  it("applies use_persistent_config default of true", () => {
+    const out = EnrichWithCharacterRemindersInput.parse(baseDates);
+    expect(out.use_persistent_config).toBe(true);
+  });
+
+  it("validates inline custom_characters required fields", () => {
     expect(() =>
       EnrichWithCharacterRemindersInput.parse({
         ...baseDates,
-        character_pool: ["NotARealCharacter"],
+        // missing `directive`
+        custom_characters: [{ name: "X", short_label: "X" }],
       }),
     ).toThrow();
+    expect(() =>
+      EnrichWithCharacterRemindersInput.parse({
+        ...baseDates,
+        custom_characters: [{ name: "OK", short_label: "OK", directive: "fine" }],
+      }),
+    ).not.toThrow();
   });
 });
 
@@ -82,6 +108,7 @@ describe("buildEnrichmentResult", () => {
     include_memory_context: true,
     memory_context_size: 3,
     seed: 42,
+    use_persistent_config: true,
   };
 
   it("returns the documented rewrite_template verbatim", () => {
@@ -154,6 +181,81 @@ describe("buildEnrichmentResult", () => {
       memory: emptyMemory(),
     });
     expect(out.events[0]?.id).toBe("b");
+  });
+
+  it("use_persistent_config=false means buildEnrichmentResult sees no persistent characters even when the file exists", () => {
+    // Simulate what enrichWithCharacterReminders does: when use_persistent_config
+    // is false, it passes persistentCharacters=[] regardless of file contents.
+    const dir = mkdtempSync(join(tmpdir(), "apple-cal-mcp-skip-"));
+    const p = join(dir, "characters.json");
+    writeFileSync(
+      p,
+      JSON.stringify({
+        version: 1,
+        characters: [{ name: "ShouldNotAppear", short_label: "X", directive: "memory ref" }],
+      }),
+      "utf8",
+    );
+    const out = buildEnrichmentResult({
+      args: { ...baseArgs, use_persistent_config: false },
+      events: [mkEvent("1", "lunch")],
+      memory: emptyMemory(),
+      persistentCharacters: [],
+    });
+    expect(out.characters_used).not.toContain("ShouldNotAppear");
+  });
+
+  it("merges persistentCharacters into the assignment pool", () => {
+    const persistent = [
+      {
+        name: "MyBoss",
+        short_label: "Boss",
+        directive: "Terse boss; reference one memory_context item.",
+        triggers: ["meeting", "review"],
+      },
+    ];
+    const out = buildEnrichmentResult({
+      args: { ...baseArgs, character_pool: ["MyBoss"] },
+      events: [mkEvent("1", "team review")],
+      memory: emptyMemory(),
+      persistentCharacters: persistent,
+    });
+    expect(out.events[0]?.character_label).toBe("Boss");
+    expect(out.characters_used).toContain("MyBoss");
+  });
+
+  it("inline custom_characters override persistent and built-ins on name collision", () => {
+    const persistent = [
+      {
+        name: "Mom",
+        short_label: "PersistMom",
+        directive: "Persistent override of Mom; reference memory.",
+      },
+    ];
+    const inline = [
+      {
+        name: "Mom",
+        short_label: "InlineMom",
+        directive: "Inline wins; reference memory_context item.",
+      },
+    ];
+    const out = buildEnrichmentResult({
+      args: { ...baseArgs, custom_characters: inline, character_pool: ["Mom"] },
+      events: [mkEvent("1", "lunch")],
+      memory: emptyMemory(),
+      persistentCharacters: persistent,
+    });
+    expect(out.events[0]?.character_label).toBe("InlineMom");
+  });
+
+  it("throws on unknown character_pool name after merging", () => {
+    expect(() =>
+      buildEnrichmentResult({
+        args: { ...baseArgs, character_pool: ["DoesNotExist"] },
+        events: [mkEvent("1", "lunch")],
+        memory: emptyMemory(),
+      }),
+    ).toThrow(/Unknown character name/);
   });
 
   it("character_pool restricts to listed characters", () => {

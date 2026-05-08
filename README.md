@@ -1,5 +1,9 @@
 # 🍎 Apple Calendar MCP — macOS Calendar for Claude
 
+![Hero — calendar with character + memory](docs/screenshots/character-memory-week.png)
+
+> Every event has a one-sentence note from someone who knows you — Mom, Friend, Coach, Therapist, your future self. Each note references a specific past event from your calendar memory.
+
 <p align="center">
   <strong>LIST! CREATE! UPDATE! DELETE!</strong>
 </p>
@@ -147,6 +151,55 @@ Format on the calendar after `apply_character_reminders` runs:
 Built-in character pool (12 characters): `Mom`, `Friend`, `Coach`, `Therapist`, `Past-you`, `Future-you`, `Werner`, `Aurelius`, `Barkeep`, `Old friend`, `夫子`, `Dog`. See `src/characters.ts` for triggers and directives.
 
 The relational-character design principle is documented at the top of `src/characters.ts`: characters are people who would _actually_ leave you a note. Their commentary's job is referential, not aesthetic — surface a relevant past event from `memory_context` and tie it to the current event in one sentence. Without a memory hit, the reminder is hollow.
+
+## Define your own characters
+
+The built-in pool is a starting point. The point of this system is that _you_ define the characters that would actually leave you a note — your boss, your therapist, your dead grandmother, your fourth-grade teacher, the friend who keeps asking when you're moving back home. Two ways, both no-fork:
+
+**1. Persistent config file.** Drop a JSON file at `~/.apple-calendar-mcp/characters.json` (created the same way as `memory.json`: parent dir `0700`, file `0600`). Every `enrich_with_character_reminders` call automatically merges these in alongside the built-ins.
+
+```json
+{
+  "version": 1,
+  "characters": [
+    {
+      "name": "My Boss",
+      "short_label": "Boss",
+      "directive": "Terse, slightly impatient, uses my last name. Reference one memory_context item with a 'remember when' or 'we agreed' phrasing. ONE sentence.",
+      "triggers": ["meeting", "review", "1:1", "deadline"]
+    },
+    {
+      "name": "Grandma",
+      "short_label": "奶奶",
+      "directive": "Gentle Cantonese grandmother, mixes Cantonese + English. Worries about whether you ate. Reference a past meal or family event from memory_context. ONE sentence.",
+      "triggers": ["dinner", "lunch", "family", "home", "holiday"]
+    }
+  ]
+}
+```
+
+Field reference: `name` (unique, ≤64 chars), `short_label` (≤16 chars, embedded in event title), `directive` (≤300 chars, must mention memory), `triggers` (lowercase substrings matched against event title/notes/location), optional `default: true` for fallback when nothing matches.
+
+**2. Inline per-call.** Pass `custom_characters` directly in the tool call — useful for one-off renderings or when the calling agent is curating a pool dynamically. Up to 30 entries.
+
+```json
+{
+  "start_date": "2026-05-01T00:00:00Z",
+  "end_date": "2026-05-08T00:00:00Z",
+  "custom_characters": [
+    {
+      "name": "Younger Sister",
+      "short_label": "Sister",
+      "directive": "Pesters you with sibling-knowledge — lowercase, dry. Reference a memory_context item only she would notice (the time you skipped a flight, lied about gym attendance, etc.). ONE sentence.",
+      "triggers": ["family", "flight", "gym", "home"]
+    }
+  ],
+  "character_pool": ["Younger Sister", "Mom"],
+  "use_persistent_config": true
+}
+```
+
+**Conflict resolution by `name`:** inline > persistent config > built-in. So `custom_characters: [{ "name": "Mom", ... }]` overrides the built-in Mom for that call. Set `use_persistent_config: false` to ignore the on-disk file (e.g. for fully reproducible runs across machines).
 
 ## Security defaults
 

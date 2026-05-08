@@ -1,3 +1,7 @@
+import { existsSync, readFileSync } from "node:fs";
+import { homedir } from "node:os";
+import { join } from "node:path";
+
 /**
  * RELATIONAL CHARACTER DESIGN PRINCIPLE
  *
@@ -126,8 +130,104 @@ export const BUILT_IN_CHARACTERS: Character[] = [
   },
 ];
 
-export const BUILT_IN_CHARACTER_NAMES = BUILT_IN_CHARACTERS.map((c) => c.name);
-
 export function getCharacterByName(name: string): Character | undefined {
   return BUILT_IN_CHARACTERS.find((c) => c.name === name);
+}
+
+// User-customizable characters live in a sibling file to memory.json so all
+// MCP-server-owned state stays under a single ~/.apple-calendar-mcp directory
+// (mode 0700, file mode 0600). The file is *optional*: missing → empty list.
+export const DEFAULT_CHARACTERS_CONFIG_PATH = join(
+  homedir(),
+  ".apple-calendar-mcp",
+  "characters.json",
+);
+
+interface CharactersConfigFile {
+  version: 1;
+  characters: Character[];
+}
+
+/**
+ * Validate a single Character record loaded from JSON. We intentionally do this
+ * by hand (not zod) so this module stays free of `types.ts` import cycles —
+ * `types.ts` consumes `BUILT_IN_CHARACTER_NAMES` from here.
+ */
+function isValidCharacter(value: unknown): value is Character {
+  if (!value || typeof value !== "object") {
+    return false;
+  }
+  const v = value as Record<string, unknown>;
+  if (typeof v.name !== "string" || v.name.trim().length === 0) {
+    return false;
+  }
+  if (
+    typeof v.short_label !== "string" ||
+    v.short_label.length === 0 ||
+    v.short_label.length > 16
+  ) {
+    return false;
+  }
+  if (typeof v.directive !== "string" || v.directive.length === 0 || v.directive.length > 300) {
+    return false;
+  }
+  if (v.triggers !== undefined) {
+    if (!Array.isArray(v.triggers)) {
+      return false;
+    }
+    if (!v.triggers.every((t) => typeof t === "string")) {
+      return false;
+    }
+  }
+  if (v.default !== undefined && typeof v.default !== "boolean") {
+    return false;
+  }
+  return true;
+}
+
+/**
+ * Load user-defined characters from a config file. Returns [] when the file is
+ * missing, empty, malformed, or has the wrong shape — never throws. Invalid
+ * entries are silently dropped so a single typo doesn't kill the rest.
+ */
+export function loadCustomCharacters(path: string = DEFAULT_CHARACTERS_CONFIG_PATH): Character[] {
+  if (!existsSync(path)) {
+    return [];
+  }
+  try {
+    const raw = readFileSync(path, "utf8");
+    if (!raw.trim()) {
+      return [];
+    }
+    const parsed = JSON.parse(raw) as Partial<CharactersConfigFile>;
+    if (!parsed || parsed.version !== 1 || !Array.isArray(parsed.characters)) {
+      return [];
+    }
+    return parsed.characters.filter(isValidCharacter);
+  } catch {
+    return [];
+  }
+}
+
+/**
+ * Merge built-in + persistent + inline characters. Conflict resolution (by
+ * `name`): inline > persistent > built-in. Returns a fresh array suitable
+ * for `assignCharacters`.
+ */
+export function mergeCharacterPools(
+  builtIns: readonly Character[],
+  persistent: readonly Character[],
+  inline: readonly Character[],
+): Character[] {
+  const byName = new Map<string, Character>();
+  for (const c of builtIns) {
+    byName.set(c.name, c);
+  }
+  for (const c of persistent) {
+    byName.set(c.name, c);
+  }
+  for (const c of inline) {
+    byName.set(c.name, c);
+  }
+  return Array.from(byName.values());
 }

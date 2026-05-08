@@ -1,5 +1,4 @@
 import { z } from "zod";
-import { BUILT_IN_CHARACTER_NAMES } from "./characters.js";
 import { BUILT_IN_PERSONA_NAMES } from "./personas.js";
 
 const isoDate = z.string().refine((s) => !Number.isNaN(Date.parse(s)), {
@@ -255,8 +254,6 @@ export type MortalityOverlayResult = z.infer<typeof MortalityOverlayOutput>;
 
 // ----- Character-reminder + memory tooling -----
 
-const CharacterName = z.enum([...BUILT_IN_CHARACTER_NAMES] as unknown as [string, ...string[]]);
-
 export const SeedCalendarMemoryInput = z.object({
   start_date: isoDate.optional(),
   end_date: isoDate.optional(),
@@ -331,14 +328,32 @@ export const QueryCalendarMemoryOutput = z.object({
   query_summary: z.string(),
 });
 
+// Inline character definitions accepted via the tool call. Same shape as the
+// built-in `Character` interface in characters.ts, validated independently
+// here so we don't import zod into characters.ts (which would create a cycle).
+const InlineCharacterSchema = z.object({
+  name: z.string().min(1).max(64),
+  short_label: z.string().min(1).max(16),
+  directive: z.string().min(1).max(300),
+  triggers: z.array(z.string().max(64)).max(32).optional(),
+  default: z.boolean().optional(),
+});
+
 export const EnrichWithCharacterRemindersInputObject = z.object({
   start_date: isoDate,
   end_date: isoDate,
   calendars: z.array(z.string().max(256)).max(20).optional(),
-  character_pool: z.array(CharacterName).max(64).optional(),
+  character_pool: z.array(z.string().max(64)).max(64).optional(),
   include_memory_context: z.boolean().default(true),
   memory_context_size: z.number().int().min(0).max(20).default(3),
   seed: z.number().int().default(42),
+  // User-defined characters merged in alongside the built-ins. Inline entries
+  // override (by `name`) anything from the persistent config or the built-in
+  // pool. Cap at 30 to keep the merged pool a sensible size.
+  custom_characters: z.array(InlineCharacterSchema).max(30).optional(),
+  // When false, skip reading ~/.apple-calendar-mcp/characters.json. Lets the
+  // caller get a fully reproducible run regardless of host machine state.
+  use_persistent_config: z.boolean().default(true),
 });
 
 export const EnrichWithCharacterRemindersInput = EnrichWithCharacterRemindersInputObject.refine(

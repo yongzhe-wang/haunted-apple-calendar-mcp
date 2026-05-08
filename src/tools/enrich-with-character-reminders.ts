@@ -1,4 +1,10 @@
-import { BUILT_IN_CHARACTERS, type Character } from "../characters.js";
+import {
+  BUILT_IN_CHARACTERS,
+  DEFAULT_CHARACTERS_CONFIG_PATH,
+  loadCustomCharacters,
+  mergeCharacterPools,
+  type Character,
+} from "../characters.js";
 import {
   DEFAULT_MEMORY_PATH,
   loadMemory,
@@ -24,11 +30,28 @@ export const REWRITE_TEMPLATE =
 const PER_EVENT_REWRITE_INSTRUCTION =
   "Compose ONE sentence in this character's voice that references at least one memory_context item; output as `{original_title} — {character_label}: {sentence}` and keep total ≤100 chars.";
 
-function resolveCharacterPool(names: readonly string[] | undefined): Character[] {
+/**
+ * Resolve the final character pool used for assignment.
+ *
+ * 1. Start from built-ins.
+ * 2. Layer in persistent config from disk (unless `use_persistent_config` is
+ *    false).
+ * 3. Layer in inline `custom_characters` from the tool call.
+ * 4. If the caller supplied an explicit `character_pool` (list of names),
+ *    filter the merged set to those names — error on any unknown name.
+ *
+ * Conflict resolution by `name`: inline > persistent > built-in.
+ */
+function resolveCharacterPool(
+  names: readonly string[] | undefined,
+  inline: readonly Character[],
+  persistent: readonly Character[],
+): Character[] {
+  const merged = mergeCharacterPools(BUILT_IN_CHARACTERS, persistent, inline);
   if (!names || names.length === 0) {
-    return BUILT_IN_CHARACTERS.slice();
+    return merged;
   }
-  const byName = new Map(BUILT_IN_CHARACTERS.map((c) => [c.name, c]));
+  const byName = new Map(merged.map((c) => [c.name, c]));
   const out: Character[] = [];
   const unknown: string[] = [];
   for (const n of names) {
@@ -99,13 +122,16 @@ interface BuildEnrichmentInput {
   args: EnrichWithCharacterRemindersArgs;
   events: CalendarEvent[];
   memory: MemoryFile;
+  /** Persisted user-defined characters loaded from the config file. */
+  persistentCharacters?: readonly Character[];
 }
 
 export function buildEnrichmentResult(
   input: BuildEnrichmentInput,
 ): EnrichWithCharacterRemindersResult {
-  const { args, events, memory } = input;
-  const pool = resolveCharacterPool(args.character_pool);
+  const { args, events, memory, persistentCharacters = [] } = input;
+  const inline = (args.custom_characters ?? []) as readonly Character[];
+  const pool = resolveCharacterPool(args.character_pool, inline, persistentCharacters);
   const sorted = events.toSorted((a, b) => Date.parse(a.start) - Date.parse(b.start));
   const assignment = assignCharacters(sorted, pool, args.seed);
   const usedNames = new Set<string>();
@@ -175,8 +201,12 @@ async function collectEvents(args: EnrichWithCharacterRemindersArgs): Promise<Ca
 export async function enrichWithCharacterReminders(
   args: EnrichWithCharacterRemindersArgs,
   memoryPath: string = DEFAULT_MEMORY_PATH,
+  charactersConfigPath: string = DEFAULT_CHARACTERS_CONFIG_PATH,
 ): Promise<EnrichWithCharacterRemindersResult> {
   const events = await collectEvents(args);
   const memory = loadMemory(memoryPath);
-  return buildEnrichmentResult({ args, events, memory });
+  const persistentCharacters = args.use_persistent_config
+    ? loadCustomCharacters(charactersConfigPath)
+    : [];
+  return buildEnrichmentResult({ args, events, memory, persistentCharacters });
 }

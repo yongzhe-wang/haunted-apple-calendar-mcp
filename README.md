@@ -17,7 +17,7 @@
 
 ![HAUNTED Apple Calendar MCP — sample event cards in different characters' voices, rendered by Claude](docs/screenshots/haunted-hero-cards.png)
 
-> **HAUNTED** is an open-source **Apple Calendar MCP server** for **Claude Desktop**, **Claude Code**, and any [Model Context Protocol](https://modelcontextprotocol.io) client. It gives Claude full read/write access to your **macOS Calendar.app** via [AppleScript](https://developer.apple.com/library/archive/documentation/AppleScript/Conceptual/AppleScriptLangGuide/) — plus 12 relational characters and 15 synthetic distillers (Mom, Future-you, Garry Tan, Alan Turing, LeBron James, …) that comment on every calendar event with one-line reminders grounded in your past calendar history. macOS-only, local-only, fully reversible.
+> **HAUNTED** is an open-source **Apple Calendar MCP server** for **Claude Desktop**, **Claude Code**, and any [Model Context Protocol](https://modelcontextprotocol.io) client. It gives Claude full read/write access to your **macOS Calendar.app** via [AppleScript](https://developer.apple.com/library/archive/documentation/AppleScript/Conceptual/AppleScriptLangGuide/) — plus 12 relational characters and 16 synthetic distillers (Mom, Future-you, Garry Tan, Alan Turing, LeBron James, Ian (Hearts2Hearts), …) that comment on every calendar event with one-line reminders grounded in your past calendar history. macOS-only, local-only, fully reversible.
 
 [GitHub](https://github.com/yongzhe-wang/haunted-apple-calendar-mcp) · [npm](https://www.npmjs.com/package/haunted-apple-calendar-mcp) · [Docs](docs/) · [Changelog](CHANGELOG.md) · [Security](SECURITY.md) · [Contributing](CONTRIBUTING.md)
 
@@ -77,7 +77,7 @@ Each character has a `directive` — a short system prompt for that voice. Tell 
 
 - **17 MCP tools** across 5 categories (CRUD, Analytics, Personas, Character Memory, Distillers)
 - **12 built-in relational characters** — bring your own with `~/.apple-calendar-mcp/characters.json`
-- **15 built-in distillers** — synthetic voices of specific named people (Garry Tan, Naval, Karpathy, …)
+- **16 built-in distillers** — synthetic voices of specific named people (Garry Tan, Naval, Karpathy, Ian (Hearts2Hearts), …)
 - **Persistent calendar memory** across years; commentary references specific past events
 - **Fully reversible** — every mutation embeds a sentinel-marked backup; revert with one tool call
 
@@ -260,9 +260,9 @@ Field reference: `name` (unique, ≤64 chars), `short_label` (≤16 chars, embed
 
 Where Characters are relational archetypes ("Mom", "Coach", "Past-you"), **Distillers** are synthetic voices distilled from the public writing, talks, and tweets of specific named people. Use them when you want a calendar entry that sounds like Garry Tan would have written it, or Paul Graham, or Naval, or Steve Jobs.
 
-Built-in pool (15 distillers, all carry the disclaimer "Synthetic voice distilled from public material. Not endorsed by the named individual."):
+Built-in pool (16 distillers, all carry the disclaimer "Synthetic voice distilled from public material. Not endorsed by the named individual."):
 
-`Garry Tan`, `Paul Graham`, `Naval Ravikant`, `Sam Altman`, `Steve Jobs`, `Andrej Karpathy`, `Marc Andreessen`, `Jeff Bezos`, `Charlie Munger`, `Brian Chesky`, `Joan Didion`, `Alan Turing` (CS history), `LeBron James` (athlete leadership), `Hilary Hahn` (violinist discipline), plus an `Old Founder` archetype for fallback.
+`Garry Tan`, `Paul Graham`, `Naval Ravikant`, `Sam Altman`, `Steve Jobs`, `Andrej Karpathy`, `Marc Andreessen`, `Jeff Bezos`, `Charlie Munger`, `Brian Chesky`, `Joan Didion`, `Alan Turing` (CS history). K-pop / performers: `Hilary Hahn` (violinist discipline), `LeBron James` (athlete leadership), `Ian (Hearts2Hearts)` (K-pop idol). Plus an `Old Founder` archetype for fallback.
 
 Use them in `enrich_with_character_reminders` via `distiller_pool`:
 
@@ -337,7 +337,7 @@ Yes. Both Claude Desktop and Claude Code load MCP servers from `claude_desktop_c
 
 ### Can I add my own characters or voices?
 
-Yes — that's the point. Drop a JSON file at `~/.apple-calendar-mcp/characters.json` (or `distillers.json`) and HAUNTED merges your roster into every `enrich_with_character_reminders` call alongside the 12 built-in characters and 15 built-in distillers. You can also pass `custom_characters: [...]` inline per tool call. See [Define your own characters](#define-your-own-characters).
+Yes — that's the point. Drop a JSON file at `~/.apple-calendar-mcp/characters.json` (or `distillers.json`) and HAUNTED merges your roster into every `enrich_with_character_reminders` call alongside the 12 built-in characters and 16 built-in distillers. You can also pass `custom_characters: [...]` inline per tool call. See [Define your own characters](#define-your-own-characters).
 
 ### Is HAUNTED safe? Does it call any external API?
 

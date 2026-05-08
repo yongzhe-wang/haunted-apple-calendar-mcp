@@ -140,7 +140,7 @@ Find every event whose notes carry the backup sentinel and restore the original 
 
 ### `list_distillers`
 
-Enumerate built-in distillers (synthetic voices distilled from public material of named people — Garry Tan, Paul Graham, Naval Ravikant, Sam Altman, Steve Jobs, Andrej Karpathy, Marc Andreessen, Jeff Bezos, Charlie Munger, Brian Chesky, Joan Didion, Alan Turing, LeBron James, Hilary Hahn, Old Founder), plus user-defined ones from `~/.apple-calendar-mcp/distillers.json`. Every output entry carries an `attribution` field stating the voice is synthetic and not endorsed by the named individual. Use this to pick which voice will narrate calendar events.
+Enumerate built-in distillers (synthetic voices distilled from public material of named people — Garry Tan, Paul Graham, Naval Ravikant, Sam Altman, Steve Jobs, Andrej Karpathy, Marc Andreessen, Jeff Bezos, Charlie Munger, Brian Chesky, Joan Didion, Alan Turing, LeBron James, Hilary Hahn, Ian (Hearts2Hearts), Old Founder), plus user-defined ones from `~/.apple-calendar-mcp/distillers.json`. Every output entry carries an `attribution` field stating the voice is synthetic and not endorsed by the named individual. Use this to pick which voice will narrate calendar events.
 
 - **Key inputs:** `worldview_filter?` (exact tag match, e.g. `"founder"`), `name_filter?` (substring), `use_persistent_config` (default `true`).
 - **Output shape:** `{ distillers: [{ name, short_label, attribution, signature_phrases, worldview_tags, representative_url?, triggers? }], total, source: "built-in" | "persistent" | "merged", notice }`.

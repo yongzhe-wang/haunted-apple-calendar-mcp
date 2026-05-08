@@ -4,6 +4,17 @@ All notable changes to `haunted-apple-calendar-mcp` (formerly `apple-calendar-mc
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.5.2] - 2026-05-08
+
+### Fixed
+
+- Voice mismatch: LeBron James was previously assigned to CS 580 TA weekly meeting and Final Exam Proctoring events with CS-domain commentary (e.g. "projective geometry, calibration"). Reassigned: CS 580 TA -> Turing (formal CS framing), Final Exam Proctoring -> Mom (logistical/caring). Live calendar updated.
+
+### Changed
+
+- LeBron James `triggers` tightened: removed `practice`, `training`, `team`, `long`, `performance`, `demo`, `pitch` (false-positive on academic / technical events). Now triggers only on work_meeting / 1:1 / manager / longevity / marathon / performance_review / career.
+- LeBron James `directive` adds explicit Anti-pattern clause forbidding technical CS / ML / music / academic specifics.
+
 ## [0.5.1] - 2026-05-08
 
 ### Added

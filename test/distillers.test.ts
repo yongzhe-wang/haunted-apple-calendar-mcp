@@ -87,6 +87,16 @@ describe("BUILT_IN_DISTILLERS", () => {
     expect(getDistillerByName("Naval Ravikant")?.short_label).toBe("Naval");
     expect(getDistillerByName("not-a-real-distiller")).toBeUndefined();
   });
+
+  it("LeBron's directive forbids speaking on technical CS / academic specifics", () => {
+    const lebron = BUILT_IN_DISTILLERS.find((d) => d.name === "LeBron James")!;
+    expect(lebron.directive).toMatch(/Anti-pattern/);
+    expect(lebron.directive.toLowerCase()).toMatch(
+      /(basketball|do not speak|don't speak|defer to)/,
+    );
+    expect(lebron.triggers).not.toContain("performance");
+    expect(lebron.triggers).not.toContain("team");
+  });
 });
 
 describe("loadCustomDistillers", () => {

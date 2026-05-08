@@ -1,6 +1,6 @@
 {
   "name": "haunted-apple-calendar-mcp",
-  "version": "0.5.1",
+  "version": "0.5.2",
   "description": "Apple Calendar MCP server for Claude — HAUNTED gives Claude Desktop and Claude Code full read/write access to your macOS Calendar.app, with 12 relational characters and 16 synthetic distiller voices that comment on every event using your past calendar memory.",
   "keywords": [
     "apple-calendar",

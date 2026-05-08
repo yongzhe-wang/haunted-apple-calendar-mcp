@@ -4,6 +4,16 @@ All notable changes to `yapping-apple-calendar-mcp` (formerly `apple-calendar-mc
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.6.3] - 2026-05-08
+
+### Added
+
+- New built-in character: `American Mom` (suburban American mom voice — text-message register, `honey`/`darling`, light 💕 emoji, worry + logistics). Pool size 12 → 13.
+
+### Changed
+
+- Existing 亚洲妈妈 `Mom` character: `short_label` `Mom` → `妈` (single Chinese character) to disambiguate from `American Mom` (`Mom`) on calendar titles. Name and directive unchanged.
+
 ## [0.6.2] - 2026-05-08
 
 ### Fixed

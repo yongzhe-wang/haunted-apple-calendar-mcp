@@ -188,7 +188,7 @@ The same principle applies to voices in `src/voices.ts` (used by `list_events_in
 
 ## Character conventions
 
-Characters in `src/characters.ts` are different from personas/voices. They are _relational_ figures (Mom, Friend, Coach, Therapist, Past-you, Future-you, Werner, Aurelius, Barkeep, Old friend, 夫子, Dog) used by the character-reminder tooling. Each character has:
+Characters in `src/characters.ts` are different from personas/voices. They are _relational_ figures (Mom [Asian, short_label `妈`], American Mom, Friend, Coach, Therapist, Past-you, Future-you, Werner, Aurelius, Barkeep, Old friend, 夫子, Dog) used by the character-reminder tooling. Each character has:
 
 - `name` — unique attribution label
 - `short_label` — ≤16 chars, embedded into the calendar title via `{title} — {short_label}: {sentence}`

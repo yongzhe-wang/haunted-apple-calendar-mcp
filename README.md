@@ -22,7 +22,7 @@
 
 ## What is YAPPING?
 
-YAPPING is an open-source Apple Calendar MCP server for Claude Desktop, Claude Code, and any MCP-compatible client. It gives Claude full read/write access to your macOS Calendar.app via AppleScript — plus 12 relational characters and 16 synthetic distillers (Mom, Future-you, Garry Tan, Alan Turing, LeBron James, Hilary Hahn, Confucius, ...) who YAP on every calendar event with one-line reminders that reference your past calendar history AND web-researched domain facts. macOS-only, local-only, fully reversible.
+YAPPING is an open-source Apple Calendar MCP server for Claude Desktop, Claude Code, and any MCP-compatible client. It gives Claude full read/write access to your macOS Calendar.app via AppleScript — plus 13 relational characters and 16 synthetic distillers (Mom, American Mom, Future-you, Garry Tan, Alan Turing, LeBron James, Hilary Hahn, Confucius, ...) who YAP on every calendar event with one-line reminders that reference your past calendar history AND web-researched domain facts. macOS-only, local-only, fully reversible.
 
 [GitHub](https://github.com/yongzhe-wang/yapping-apple-calendar-mcp) · [npm](https://www.npmjs.com/package/yapping-apple-calendar-mcp) · [Docs](docs/) · [Changelog](CHANGELOG.md) · [Security](SECURITY.md) · [Contributing](CONTRIBUTING.md)
 
@@ -72,7 +72,7 @@ YAPPING is an **Apple Calendar MCP server**: a small Node.js binary that speaks 
 
 The character system is the heart of YAPPING — and it's designed to be customized. Three layers, in increasing order of effort:
 
-1. **Pick from 12 built-in characters** (Mom, Friend, Coach, Therapist, Past-you, Future-you, Werner, Aurelius, Barkeep, Old friend, 夫子, Dog) — no setup required.
+1. **Pick from 13 built-in characters** (Mom 妈 [Asian], American Mom, Friend, Coach, Therapist, Past-you, Future-you, Werner, Aurelius, Barkeep, Old friend, 夫子, Dog) — no setup required. Note: the Asian-mother `Mom` now uses the short_label `妈` to distinguish it from `American Mom` on calendar titles.
 2. **Define inline custom characters per call** — pass `custom_characters: [...]` to `enrich_with_character_reminders` for a one-off render.
 3. **Persist your character roster** at `~/.apple-calendar-mcp/characters.json` — every future call merges these in alongside the built-ins. (The `~/.apple-calendar-mcp/` data path is **preserved across renames** so existing users keep their memory.)
 
@@ -81,7 +81,7 @@ Each character has a `directive` — a short system prompt for that voice. Tell 
 ## What YAPPING does
 
 - **17 MCP tools** across 5 categories (CRUD, Analytics, Personas, Character Memory, Distillers)
-- **12 built-in relational characters** — bring your own with `~/.apple-calendar-mcp/characters.json`
+- **13 built-in relational characters** — bring your own with `~/.apple-calendar-mcp/characters.json`
 - **16 built-in distillers** — synthetic voices of specific named people (Garry Tan, Naval, Karpathy, Ian (Hearts2Hearts), …)
 - **Persistent calendar memory** across years; commentary references specific past events
 - **Fully reversible** — every mutation embeds a sentinel-marked backup; revert with one tool call

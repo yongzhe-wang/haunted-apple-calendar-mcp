@@ -1,0 +1,194 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <title>HAUNTED — sample cards</title>
+    <style>
+      :root {
+        color-scheme: dark;
+      }
+      html,
+      body {
+        margin: 0;
+        padding: 0;
+        background: #0e0e10;
+        font-family:
+          -apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI", Helvetica, Arial, sans-serif;
+        -webkit-font-smoothing: antialiased;
+        color: #e9e9ea;
+      }
+      .frame {
+        width: 1600px;
+        height: 600px;
+        box-sizing: border-box;
+        padding: 36px 48px 32px;
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+      }
+      .header {
+        font-size: 13px;
+        letter-spacing: 0.04em;
+        color: #6a6a6e;
+        text-transform: none;
+      }
+      .header b {
+        color: #b8b8bb;
+        font-weight: 600;
+        letter-spacing: 0.18em;
+      }
+      .footer {
+        font-size: 12px;
+        color: #5a5a5e;
+        text-align: center;
+        letter-spacing: 0.04em;
+      }
+      .row {
+        display: flex;
+        gap: 24px;
+        justify-content: center;
+      }
+      .card {
+        width: 348px;
+        height: 420px;
+        background: #1a1a1d;
+        border-radius: 14px;
+        padding: 28px 28px 26px 32px;
+        box-sizing: border-box;
+        display: flex;
+        flex-direction: column;
+        position: relative;
+        overflow: hidden;
+        box-shadow:
+          0 1px 0 rgba(255, 255, 255, 0.04) inset,
+          0 12px 32px rgba(0, 0, 0, 0.45);
+      }
+      .stripe {
+        position: absolute;
+        top: 0;
+        left: 0;
+        bottom: 0;
+        width: 6px;
+      }
+      .cal-tag {
+        font-size: 11px;
+        letter-spacing: 0.18em;
+        text-transform: uppercase;
+        color: #8a8a8e;
+        margin-bottom: 16px;
+      }
+      .title {
+        color: #ffffff;
+        font-weight: 600;
+        font-size: 19px;
+        line-height: 1.42;
+        letter-spacing: -0.005em;
+      }
+      .sep {
+        height: 1px;
+        background: rgba(255, 255, 255, 0.06);
+        margin: 18px 0 16px;
+      }
+      .voice {
+        font-size: 15px;
+        line-height: 1.55;
+        color: #cfcfcf;
+      }
+      .voice .who {
+        font-style: italic;
+        color: #e6e6e6;
+      }
+      .time {
+        margin-top: auto;
+        font-size: 13px;
+        color: #888;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+      }
+      .time .dot {
+        display: inline-block;
+        width: 8px;
+        height: 8px;
+        border-radius: 50%;
+        border: 1.5px solid #888;
+        box-sizing: border-box;
+      }
+      /* color variants */
+      .c-courses {
+        background: #c2185b;
+      }
+      .c-appts {
+        background: #388e3c;
+      }
+      .c-work {
+        background: #c62828;
+      }
+      .c-life {
+        background: #00838f;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="frame">
+      <div class="header">
+        <b>HAUNTED</b> &nbsp; — every event has a one-line note from someone who knows you
+      </div>
+
+      <div class="row">
+        <!-- Card 1 — Mom / Courses -->
+        <div class="card">
+          <div class="stripe c-courses"></div>
+          <div class="cal-tag">Courses</div>
+          <div class="title">CIS/BAN 3200 — Homework 7 (Due)</div>
+          <div class="sep"></div>
+          <div class="voice">
+            <span class="who">— Mom:</span> 你 04-22 才搞过 “CIS 3200 - Homework
+            6”，妈妈担心你又熬夜。
+          </div>
+          <div class="time"><span class="dot"></span> 8 – 9 AM &nbsp;·&nbsp; Wed Apr 29</div>
+        </div>
+
+        <!-- Card 2 — Friend / Appointments -->
+        <div class="card">
+          <div class="stripe c-appts"></div>
+          <div class="cal-tag">Appointments</div>
+          <div class="title">Lunch with leo &amp; Eleanor</div>
+          <div class="sep"></div>
+          <div class="voice">
+            <span class="who">— Friend:</span> bro 上次 “Lunch with Ilia Popov” 05-03 才搞过 — round
+            5 already?
+          </div>
+          <div class="time"><span class="dot"></span> 12 – 1 PM &nbsp;·&nbsp; Tue Apr 28</div>
+        </div>
+
+        <!-- Card 3 — Future-you / Work/Job -->
+        <div class="card">
+          <div class="stripe c-work"></div>
+          <div class="cal-tag">Work / Job</div>
+          <div class="title">CS 580 — TA Weekly Meeting</div>
+          <div class="sep"></div>
+          <div class="voice">
+            <span class="who">— Future-you:</span> From 60: this hour is finite. Was it worth it?
+          </div>
+          <div class="time"><span class="dot"></span> 6 – 7 PM &nbsp;·&nbsp; Tue Apr 28</div>
+        </div>
+
+        <!-- Card 4 — Therapist / life -->
+        <div class="card">
+          <div class="stripe c-life"></div>
+          <div class="cal-tag">life</div>
+          <div class="title">Reply to Prof. Michael Hicks — pick meeting time</div>
+          <div class="sep"></div>
+          <div class="voice">
+            <span class="who">— Therapist:</span> I notice “meeting with CIS prof…” — what feeling
+            came up just now?
+          </div>
+          <div class="time"><span class="dot"></span> 9 – 10 AM &nbsp;·&nbsp; Mon Apr 27</div>
+        </div>
+      </div>
+
+      <div class="footer">github.com/yongzhe-wang/haunted-mcp</div>
+    </div>
+  </body>
+</html>

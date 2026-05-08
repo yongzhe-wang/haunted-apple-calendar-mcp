@@ -9,7 +9,7 @@
   <img src="https://img.shields.io/badge/macOS-only-lightgrey.svg">
 </p>
 
-![Hero — calendar haunted by people who know you](docs/screenshots/character-memory-week.png)
+![HAUNTED — sample event cards in different characters' voices](docs/screenshots/haunted-hero-cards.png)
 
 > HAUNTED is an MCP server that lets the people who know you comment on every event in your Apple Calendar. Mom, your friend, your future self, your therapist, your bartender — they all leave one-line notes referencing your past calendar history. macOS-only, local-only, fully reversible.
 

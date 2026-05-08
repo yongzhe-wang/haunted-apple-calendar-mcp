@@ -4,10 +4,12 @@
 set -euo pipefail
 
 cd "$(dirname "$0")"
-SRC="character-memory-week.html"
-OUT="character-memory-week.png"
-WIDTH=1600
-HEIGHT=1400
+SRC="${1:-character-memory-week.html}"
+OUT="${SRC%.html}.png"
+case "$SRC" in
+  haunted-hero-cards.html) WIDTH=1600; HEIGHT=600 ;;
+  *) WIDTH=1600; HEIGHT=1400 ;;
+esac
 
 if [[ ! -f "$SRC" ]]; then
   echo "missing $SRC" >&2

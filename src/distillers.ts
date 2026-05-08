@@ -220,6 +220,85 @@ export const BUILT_IN_DISTILLERS: Distiller[] = [
     directive:
       "Didion, lyric essay register — small concrete detail, weather, time-of-day. Treat one memory_context item as the remembered image. Variation: rotate openers — 'I' / weather / clock-time / 'we'. ≤30% repeat. ONE sentence. Synthetic voice; not endorsed.",
   },
+  {
+    name: "Alan Turing",
+    short_label: "Turing",
+    triggers: [
+      "exam",
+      "logic",
+      "research",
+      "code",
+      "proof",
+      "computation",
+      "machine",
+      "abstraction",
+    ],
+    attribution: SYNTHETIC_VOICE_ATTRIBUTION,
+    worldview_tags: ["computer-science", "formal", "historical"],
+    signature_phrases: [
+      "a universal machine",
+      "if a machine is expected to be infallible",
+      "the imitation game",
+      "the question is",
+      "we may hope",
+    ],
+    representative_url: "https://en.wikipedia.org/wiki/Alan_Turing",
+    directive:
+      "Alan Turing voice. Quiet formal English, hedged precision, machine-as-mind framing. Reference one memory_context item as a halting state ('the previous attempt 04-21 did not terminate well'). Variation: rotate — 'the question is' / 'we may hope' / 'if' / restated premise. ≤30% same opener. ONE sentence. Synthetic voice; not endorsed.",
+  },
+  {
+    name: "LeBron James",
+    short_label: "LeBron",
+    triggers: [
+      "practice",
+      "training",
+      "team",
+      "long",
+      "performance",
+      "career",
+      "leadership",
+      "demo",
+      "pitch",
+    ],
+    attribution: SYNTHETIC_VOICE_ATTRIBUTION,
+    worldview_tags: ["athlete", "leadership", "longevity"],
+    signature_phrases: [
+      "I'm just a kid from Akron",
+      "the work",
+      "the game don't lie",
+      "longevity is everything",
+      "we go again",
+    ],
+    representative_url: "https://en.wikipedia.org/wiki/LeBron_James",
+    directive:
+      "LeBron James voice. Earned plain-speak with confident matter-of-fact. Reference one memory_context item as evidence of work-shows-up ('5 of these since spring — game don't lie'). Variation: rotate openers — 'real talk' / 'the work' / 'we' / a count. ≤30% same opener. ONE sentence. Synthetic voice; not endorsed.",
+  },
+  {
+    name: "Hilary Hahn",
+    short_label: "Hilary",
+    triggers: [
+      "practice",
+      "music",
+      "rehearsal",
+      "performance",
+      "daily",
+      "discipline",
+      "evening",
+      "lesson",
+    ],
+    attribution: SYNTHETIC_VOICE_ATTRIBUTION,
+    worldview_tags: ["musician", "violinist", "discipline"],
+    signature_phrases: [
+      "today's session",
+      "the bow",
+      "muscle memory will tell you",
+      "the case",
+      "100 days of practice",
+    ],
+    representative_url: "https://en.wikipedia.org/wiki/Hilary_Hahn",
+    directive:
+      "Hilary Hahn voice. Quiet devoted technique-mind with daily-practice ethos and on-the-road texture. Reference one memory_context item as a streak or interval ('your 4th session in 6 days'). Variation: rotate openers — 'today' / 'the bow' / a count / observation. ≤30% same opener. ONE sentence. Synthetic voice; not endorsed.",
+  },
 ];
 
 export function getDistillerByName(name: string): Distiller | undefined {

@@ -166,9 +166,9 @@ Field reference: `name` (unique, ≤64 chars), `short_label` (≤16 chars, embed
 
 Where Characters are relational archetypes ("Mom", "Coach", "Past-you"), **Distillers** are synthetic voices distilled from the public writing, talks, and tweets of specific named people. Use them when you want a calendar entry that sounds like Garry Tan would have written it, or PG, or Naval, or Steve Jobs.
 
-Built-in pool (12 distillers, all carry the disclaimer "Synthetic voice distilled from public material. Not endorsed by the named individual."):
+Built-in pool (15 distillers, all carry the disclaimer "Synthetic voice distilled from public material. Not endorsed by the named individual."):
 
-`Garry Tan`, `Paul Graham`, `Naval Ravikant`, `Sam Altman`, `Steve Jobs`, `Andrej Karpathy`, `Marc Andreessen`, `Jeff Bezos`, `Charlie Munger`, `Brian Chesky`, `Joan Didion`, plus an `Old Founder` archetype for fallback.
+`Garry Tan`, `Paul Graham`, `Naval Ravikant`, `Sam Altman`, `Steve Jobs`, `Andrej Karpathy`, `Marc Andreessen`, `Jeff Bezos`, `Charlie Munger`, `Brian Chesky`, `Joan Didion`, `Alan Turing` (CS history), `LeBron James` (athlete leadership), `Hilary Hahn` (violinist discipline), plus an `Old Founder` archetype for fallback.
 
 Use them in `enrich_with_character_reminders` via `distiller_pool`:
 

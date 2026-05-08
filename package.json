@@ -1,6 +1,6 @@
 {
   "name": "haunted-mcp",
-  "version": "0.3.0",
+  "version": "0.3.1",
   "description": "Haunted: an MCP server that lets the people who know you comment on every event in your Apple Calendar. Built-in characters, custom characters, persistent memory.",
   "keywords": [
     "apple-calendar",

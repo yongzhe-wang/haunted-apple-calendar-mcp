@@ -4,6 +4,12 @@ All notable changes to `haunted-mcp` (formerly `apple-calendar-mcp`, then `heckl
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.3.1] - 2026-05-08
+
+### Added
+
+- 3 new built-in distillers: Alan Turing (CS history), LeBron James (athlete leadership), Hilary Hahn (violinist discipline). Pool: 12 -> 15.
+
 ## [0.3.0] - 2026-05-07
 
 ### Added

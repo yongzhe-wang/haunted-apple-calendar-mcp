@@ -4,6 +4,12 @@ All notable changes to `yapping-apple-calendar-mcp` (formerly `apple-calendar-mc
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.6.4] - 2026-05-08
+
+### Fixed
+
+- REWRITE_INSTRUCTIONS_V2 now explicitly forbids self-disclosing demo markers in event titles ('(fake)', '(demo)', '(test)', '(mock)', '(placeholder)', etc.). Two calendar events had `(fake)` carried forward across mutation passes — caught visually in the iCloud-rendered week view. The rule now lives in the prompt so subsequent mutation passes can't reintroduce these markers. Internal ops/revert tracking goes in description/notes only.
+
 ## [0.6.3] - 2026-05-08
 
 ### Added

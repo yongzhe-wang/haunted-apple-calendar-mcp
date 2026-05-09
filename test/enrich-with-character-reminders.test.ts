@@ -130,6 +130,15 @@ describe("buildEnrichmentResult", () => {
     expect(REWRITE_INSTRUCTIONS_V2).toContain("NEVER fabricate");
   });
 
+  it("REWRITE_INSTRUCTIONS_V2 forbids demo markers in title", () => {
+    expect(REWRITE_INSTRUCTIONS_V2).toMatch(/\(fake\)/i);
+    expect(REWRITE_INSTRUCTIONS_V2).toMatch(/\(demo\)/i);
+    expect(REWRITE_INSTRUCTIONS_V2.toLowerCase()).toMatch(/(never|forbid|no )/);
+    expect(REWRITE_INSTRUCTIONS_V2).toMatch(/title|summary/i);
+    // Markers belong in notes, not title
+    expect(REWRITE_INSTRUCTIONS_V2.toLowerCase()).toMatch(/notes|description/);
+  });
+
   it("each enriched event has the v2 context bundle keys", () => {
     const out = buildEnrichmentResult({
       args: baseArgs,

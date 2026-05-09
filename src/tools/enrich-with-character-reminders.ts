@@ -47,7 +47,8 @@ export const REWRITE_INSTRUCTIONS_V2 =
   "4. Use external_facts to give actual domain advice in voice (e.g. if voice is Karpathy and fact says event is a CG course, the advice should reference scaling laws / forward pass / etc. — voice + domain).\n" +
   '5. Output: "{original_title} — {character_label}: {your_sentence}"\n' +
   "6. Total ≤ 100 chars.\n" +
-  "7. NEVER fabricate. The voice is the wrapper; every claim must trace to context.";
+  "7. NEVER fabricate. The voice is the wrapper; every claim must trace to context.\n" +
+  '8. NEVER include any self-disclosing demo marker in the rewritten title — no "(fake)", "(demo)", "(test)", "(mock)", "(placeholder)", "(stub)", "(TBD)", "(XXX)", or similar literal qualifiers wrapped in parentheses. The rewritten title must read like a real calendar entry, not an annotated one. If an internal flag is needed for ops/revert tracking, put it in the description/notes field (which is hidden from the calendar cell view) — never in the title.';
 
 const PER_EVENT_REWRITE_INSTRUCTION =
   "Compose ONE sentence in this character's voice. Reference at least one literal item from memory_context / people_context / topic_context / external_facts / user_notes_relevant. If ALL are empty, say 'first time on calendar' (or '初见于此') honestly. Output as `{original_title} — {character_label}: {sentence}`, ≤100 chars total. Never fabricate.";

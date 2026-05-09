@@ -1,6 +1,6 @@
 {
   "name": "yapping-apple-calendar-mcp",
-  "version": "0.6.3",
+  "version": "0.6.4",
   "description": "Yapping: an MCP server that makes your macOS Apple Calendar yap in 28 voices (Mom, Future-you, Garry Tan, LeBron James, Hilary Hahn, Alan Turing, Confucius, ...) on every event using your past calendar memory + web research. For Claude Desktop, Claude Code, any MCP client.",
   "keywords": [
     "apple-calendar",

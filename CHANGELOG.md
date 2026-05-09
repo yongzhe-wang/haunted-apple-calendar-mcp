@@ -4,6 +4,12 @@ All notable changes to `yapping-apple-calendar-mcp` (formerly `apple-calendar-mc
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.6.6] - 2026-05-08
+
+### Changed
+
+- REWRITE_INSTRUCTIONS_V2 rule #9: ORIGINAL_TITLE portion of mutated event titles must be ALL UPPERCASE; voice + sentence portion retains natural case. Visual distinction between literal event and character commentary. Example: 'RENEW DRIVER\'S LICENSE — Mom: honey...'. Non-Latin characters (Chinese, Korean, etc.) unchanged.
+
 ## [0.6.5] - 2026-05-08
 
 ### Documented

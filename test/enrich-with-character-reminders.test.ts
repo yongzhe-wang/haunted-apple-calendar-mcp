@@ -139,6 +139,12 @@ describe("buildEnrichmentResult", () => {
     expect(REWRITE_INSTRUCTIONS_V2.toLowerCase()).toMatch(/notes|description/);
   });
 
+  it("REWRITE_INSTRUCTIONS_V2 requires ALL CAPS on original title", () => {
+    expect(REWRITE_INSTRUCTIONS_V2).toMatch(/UPPERCASE|ALL CAPS|all caps/i);
+    expect(REWRITE_INSTRUCTIONS_V2).toMatch(/ORIGINAL_TITLE|original.title/i);
+    expect(REWRITE_INSTRUCTIONS_V2).toMatch(/before " — "|before the em-dash|before .—./);
+  });
+
   it("each enriched event has the v2 context bundle keys", () => {
     const out = buildEnrichmentResult({
       args: baseArgs,

@@ -48,7 +48,11 @@ export const REWRITE_INSTRUCTIONS_V2 =
   '5. Output: "{original_title} — {character_label}: {your_sentence}"\n' +
   "6. Total ≤ 100 chars.\n" +
   "7. NEVER fabricate. The voice is the wrapper; every claim must trace to context.\n" +
-  '8. NEVER include any self-disclosing demo marker in the rewritten title — no "(fake)", "(demo)", "(test)", "(mock)", "(placeholder)", "(stub)", "(TBD)", "(XXX)", or similar literal qualifiers wrapped in parentheses. The rewritten title must read like a real calendar entry, not an annotated one. If an internal flag is needed for ops/revert tracking, put it in the description/notes field (which is hidden from the calendar cell view) — never in the title.';
+  '8. NEVER include any self-disclosing demo marker in the rewritten title — no "(fake)", "(demo)", "(test)", "(mock)", "(placeholder)", "(stub)", "(TBD)", "(XXX)", or similar literal qualifiers wrapped in parentheses. The rewritten title must read like a real calendar entry, not an annotated one. If an internal flag is needed for ops/revert tracking, put it in the description/notes field (which is hidden from the calendar cell view) — never in the title.\n' +
+  '9. The ORIGINAL_TITLE portion of the output (text before " — ") MUST be ALL UPPERCASE. The voice + sentence portion (after " — ") retains its natural case. This visually distinguishes the literal event from the character commentary. Example:\n' +
+  '   GOOD: "RENEW DRIVER\'S LICENSE — Mom: honey, bring your old license..."\n' +
+  '   BAD:  "Renew driver\'s license — Mom: honey, bring your old license..."\n' +
+  "   Non-Latin characters (Chinese, Korean, etc.) have no case — leave them as-is. The rule applies to Latin letters only.";
 
 const PER_EVENT_REWRITE_INSTRUCTION =
   "Compose ONE sentence in this character's voice. Reference at least one literal item from memory_context / people_context / topic_context / external_facts / user_notes_relevant. If ALL are empty, say 'first time on calendar' (or '初见于此') honestly. Output as `{original_title} — {character_label}: {sentence}`, ≤100 chars total. Never fabricate.";

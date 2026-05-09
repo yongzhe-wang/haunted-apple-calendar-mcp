@@ -1,3 +1,27 @@
+/**
+ * APPLESCRIPT NUMERIC PARSING PITFALL
+ *
+ * AppleScript can return numeric values in scientific notation
+ * when magnitudes exceed certain thresholds:
+ *
+ *   (current date) - (date "1970-01-01")  →  "1.7769348E+9"
+ *
+ * `parseInt` on this string returns `1` (it truncates at the `E`).
+ * That collapsed thousands of event epoch deltas to the Unix epoch
+ * in earlier ad-hoc dump scripts.
+ *
+ * Defenses:
+ *   1. Prefer ISO round-trip: ((theDate as «class isot» as string))
+ *      then `Date.parse(iso)` on the JS side.
+ *   2. If you must return a number from AppleScript, cast
+ *      `as integer` so it comes back in normal form.
+ *   3. NEVER `parseInt()` an unbounded AppleScript numeric.
+ *      Use `parseFloat()` + `Math.round()` if forced.
+ *
+ * The MCP tools in this repo use the ISO round-trip path (defense
+ * #1) and are safe. This comment exists so future contributors and
+ * one-off /tmp scripts don't re-introduce the bug.
+ */
 import { execFile } from "node:child_process";
 import { promisify } from "node:util";
 import { AppleCalendarError } from "./errors.js";

@@ -4,6 +4,12 @@ All notable changes to `yapping-apple-calendar-mcp` (formerly `apple-calendar-mc
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.6.5] - 2026-05-08
+
+### Documented
+
+- AppleScript scientific-notation parsing pitfall in src/applescript.ts header comment. Prior ad-hoc dump scripts in /tmp/ used `parseInt` on AppleScript numeric output, which silently truncated `1.7769348E+9` to `1` and collapsed every event epoch to the Unix epoch — dropping events from date filters. Production MCP tools use ISO string round-trip and are unaffected; comment documents the pitfall to prevent future contributors and one-off scripts from reintroducing it.
+
 ## [0.6.4] - 2026-05-08
 
 ### Fixed
